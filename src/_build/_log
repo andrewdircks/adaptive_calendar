@@ -1,0 +1,14 @@
+### Starting build.
+# Target: calendar.mli.depends, tags: { extension:mli, file:calendar.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules calendar.mli > calendar.mli.depends # cached
+# Target: time.mli.depends, tags: { extension:mli, file:time.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules time.mli > time.mli.depends # cached
+# Target: time.cmi, tags: { byte, compile, extension:mli, file:time.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o time.cmi time.mli # cached
+# Target: calendar.cmi, tags: { byte, compile, extension:mli, file:calendar.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o calendar.cmi calendar.mli # cached
+# Target: calendar.ml.depends, tags: { extension:ml, file:calendar.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules calendar.ml > calendar.ml.depends # cached
+# Target: calendar.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:calendar.cmo, file:calendar.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o calendar.cmo calendar.ml # cached
+# Compilation successful.

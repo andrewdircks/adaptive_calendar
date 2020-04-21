@@ -56,10 +56,3 @@ val is_leap_year : bool
 
 (** [now] is the current date and time of the user. *)
 val now : t
-
-(** [from_string str] is the date and time value of [str].
-    Requires: [str] is in the format "mm/dd/yyyy/hh:zz/xx": 
-    where mm represents the month number, dd represents the day number,
-    yyyy represents the year number, hh represents the hour number, zz represents
-    the minute number, and xx is either "AM" or "PM".*)
-val from_string : string -> t

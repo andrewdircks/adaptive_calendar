@@ -1,0 +1,17 @@
+{
+  "events": [
+    {
+      "starts": "04/20/2020/05:30/PM",
+      "ends": "04/20/2020/06:30/PM",
+      "name": "Meeting",
+      "description": "Andrew Dircky and Sammy Kantor mate are discussing their CS project."
+    },
+    {
+      "starts": "04/25/2020/3:30/AM",
+      "ends": "04/25/2020/6:30/AM",
+      "name": "Workout",
+      "description": "gotta beat the meat"
+    }
+  ],
+  "calname": "Andrew and Sam - CS3110 MS1"
+}

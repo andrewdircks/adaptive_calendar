@@ -280,19 +280,19 @@ let toLocal d = increment_hour d difference
 let toGMT d = increment_hour d (-difference)
 
 (** [month_from_int m] the [month] analog of [m].
-    Requires: [m] is between 1 and 12.*)
+    Requires: [m] is between 0 and 11.*)
 let month_from_int (m : int) : month = 
-  if m = 1 then Jan
-  else if m = 2 then Feb
-  else if m = 3 then Mar 
-  else if m = 4 then Apr 
-  else if m = 5 then May 
-  else if m = 6 then Jun 
-  else if m = 7 then Jul
-  else if m = 8 then Aug 
-  else if m = 9 then Sep 
-  else if m = 10 then Oct 
-  else if m = 11 then Nov 
+  if m = 0 then Jan
+  else if m = 1 then Feb
+  else if m = 2 then Mar 
+  else if m = 3 then Apr 
+  else if m = 4 then May 
+  else if m = 5 then Jun 
+  else if m = 6 then Jul
+  else if m = 7 then Aug 
+  else if m = 8 then Sep 
+  else if m = 9 then Oct 
+  else if m = 10 then Nov 
   else Dec
 
 (** [dayw_from_int d] the [day_w] analog of [d].
@@ -317,31 +317,10 @@ let min_to_quarters (m : int) : time_m =
 let now =
   let tm = Unix.localtime (Unix.time()) in 
   { year = tm.tm_year + 1900;
-    month = month_from_int (tm.tm_mon+1);
+    month = month_from_int tm.tm_mon;
     day_m = tm.tm_mday;
     day_w = dayw_from_int tm.tm_wday;
     time_d = {
       hour = tm.tm_hour;
       minute = min_to_quarters tm.tm_min;
     } } 
-
-(** [clocl_to_military i ampm] the hour in military time that [i] represents.
-    Requires: [ampm] is either "am" or "pm". *)
-let clock_to_military (ampm : string) (i : int) : int = 
-  if (ampm <> "am" && ampm <> "pm") then failwith "not am or pm" else
-  if (ampm = "am") then i else 12 + i
-
-
-(* "mm/dd/yyyy/hh:zz/xx" *)
-let from_string str = 
-  if String.length str <> 19 then failwith "invalid string length" else 
-    {
-      year = String.sub str 6 4 |> int_of_string;
-      month = String.sub str 0 2 |> int_of_string |> month_from_int;
-      day_m = String.sub str 3 2 |> int_of_string;
-      day_w = Wed;
-      time_d = {
-        hour = String.sub str 11 2 |> int_of_string |> clock_to_military (String.sub str 17 2);
-        minute = String.sub str 11 2 |> int_of_string |> min_to_quarters;
-      }
-    }
