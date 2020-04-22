@@ -1,4 +1,5 @@
 open Time
+open Yojson.Basic.Util
 
 type event = {
   starts : Time.t;

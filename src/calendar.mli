@@ -1,5 +1,3 @@
-(* open Yojson.Basic *)
-open Time
 (** 
    Representation of calendar data.
 

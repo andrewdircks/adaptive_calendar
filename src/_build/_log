@@ -1,14 +1,38 @@
 ### Starting build.
-# Target: calendar.mli.depends, tags: { extension:mli, file:calendar.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules calendar.mli > calendar.mli.depends # cached
-# Target: time.mli.depends, tags: { extension:mli, file:time.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules time.mli > time.mli.depends # cached
-# Target: time.cmi, tags: { byte, compile, extension:mli, file:time.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o time.cmi time.mli # cached
-# Target: calendar.cmi, tags: { byte, compile, extension:mli, file:calendar.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o calendar.cmi calendar.mli # cached
-# Target: calendar.ml.depends, tags: { extension:ml, file:calendar.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules calendar.ml > calendar.ml.depends # cached
-# Target: calendar.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:calendar.cmo, file:calendar.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o calendar.cmo calendar.ml # cached
-# Compilation successful.
+# Target: test.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:test.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules test.ml > test.ml.depends # cached
+# Target: calendar.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:calendar.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules calendar.mli > calendar.mli.depends # cached
+# Target: time.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:time.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules time.mli > time.mli.depends # cached
+# Target: time.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:time.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o time.cmi time.mli # cached
+# Target: calendar.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:calendar.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmi calendar.mli # cached
+# Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.mli > command.mli.depends # cached
+# Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmi command.mli # cached
+# Target: state.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:state.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.mli > state.mli.depends # cached
+# Target: state.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli # cached
+# Target: test.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:test.cmo, file:test.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o test.cmo test.ml
++ ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o test.cmo test.ml
+File "test.ml", line 7, characters 34-43:
+7 |   Yojson.Basic.from_file jfile |> from_json
+                                      ^^^^^^^^^
+Error: This expression has type int -> Calendar.t
+       but an expression was expected of type Yojson.Basic.t -> 'a
+       Type int is not compatible with type
+         Yojson.Basic.t =
+           [ `Assoc of (string * Yojson.Basic.t) list
+           | `Bool of bool
+           | `Float of float
+           | `Int of int
+           | `List of Yojson.Basic.t list
+           | `Null
+           | `String of string ] 
+Command exited with code 2.
+# Compilation unsuccessful.
