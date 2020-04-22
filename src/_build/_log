@@ -10,29 +10,50 @@ ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o t
 # Target: calendar.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:calendar.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmi calendar.mli # cached
 # Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.mli > command.mli.depends # cached
-# Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmi command.mli # cached
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.mli > command.mli.depends
 # Target: state.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:state.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.mli > state.mli.depends # cached
+# Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmi command.mli
 # Target: state.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli # cached
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli
 # Target: test.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:test.cmo, file:test.ml, implem, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o test.cmo test.ml
-+ ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o test.cmo test.ml
-File "test.ml", line 7, characters 34-43:
-7 |   Yojson.Basic.from_file jfile |> from_json
-                                      ^^^^^^^^^
-Error: This expression has type int -> Calendar.t
-       but an expression was expected of type Yojson.Basic.t -> 'a
-       Type int is not compatible with type
-         Yojson.Basic.t =
-           [ `Assoc of (string * Yojson.Basic.t) list
-           | `Bool of bool
-           | `Float of float
-           | `Int of int
-           | `List of Yojson.Basic.t list
-           | `Null
-           | `String of string ] 
+# Target: calendar.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:calendar.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules calendar.ml > calendar.ml.depends # cached
+# Target: calendar.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:calendar.cmo, file:calendar.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmo calendar.ml # cached
+# Target: command.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:command.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.ml > command.ml.depends
+# Target: state.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:state.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.ml > state.ml.depends # cached
+# Target: command.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:command.cmo, file:command.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmo command.ml
++ ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmo command.ml
+File "command.ml", line 56, characters 8-42:
+56 |         int_of_string (String.sub str 0 2);
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 10: this expression should have type unit.
+File "command.ml", line 57, characters 8-42:
+57 |         int_of_string (String.sub str 3 2);
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 10: this expression should have type unit.
+File "command.ml", line 58, characters 8-42:
+58 |         int_of_string (String.sub str 6 4);
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 10: this expression should have type unit.
+File "command.ml", line 59, characters 8-43:
+59 |         int_of_string (String.sub str 11 2);
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 10: this expression should have type unit.
+File "command.ml", line 60, characters 8-43:
+60 |         int_of_string (String.sub str 14 2);
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 10: this expression should have type unit.
+File "command.ml", line 94, characters 32-39:
+94 |       let description = List.hd List.tl ((List.tl (List.tl input))) in 
+                                     ^^^^^^^
+Error: This expression has type 'a list -> 'a list
+       but an expression was expected of type ('b -> 'c) list
 Command exited with code 2.
 # Compilation unsuccessful.

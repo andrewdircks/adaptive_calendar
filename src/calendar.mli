@@ -19,10 +19,10 @@ exception EventDNE
 
 (** [from_json j] is the calendar that [j] represents.
     Requires: [j] is a valid JSON calendar representation. *)
-val from_json : int -> t
+val from_json : Yojson.Basic.t -> t
 
 (** [to_json c] is the JSON file that [c] represents. *)
-val to_json :  t -> int
+val to_json :  t -> Yojson.Basic.t
 
 (** [get_events c] is the list of events in calendar [c]. *)
 val get_events : t -> event list

@@ -22,17 +22,10 @@ exception StartAfterEnd
 exception InvalidDateString
 
 (** The type representing a calendar date. *)
-type date_phrase = string
+type date_phrase 
 
 (** The type representing main user commands. *)
-type command = 
-  | Add 
-  | Delete 
-  | Edit 
-  | View
-  | Previous
-  | Next
-  | Save
+type command 
 
 (** The type representing [Add] commands.*)
 type add_command 
