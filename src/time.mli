@@ -63,3 +63,7 @@ val now : t
     yyyy represents the year number, hh represents the hour number, zz represents
     the minute number, and xx is either "AM" or "PM".*)
 val from_string : string -> t
+
+(** [occurs_before d1 d2] is true if [d1] is earlier thatn [d2] and 
+    false otherwise. *)
+val occurs_before : t -> t -> bool

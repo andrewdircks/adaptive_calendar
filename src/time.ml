@@ -328,7 +328,8 @@ let now =
 (** [clocl_to_military i ampm] the hour in military time that [i] represents.
     Requires: [ampm] is either "am" or "pm". *)
 let clock_to_military (ampm : string) (i : int) : int = 
-  if (ampm <> "am" && ampm <> "pm") then failwith "not am or pm" else
+  if (String.lowercase_ascii ampm <> "am" && String.lowercase_ascii ampm <> "pm") 
+  then failwith "not am or pm" else
   if (ampm = "am") then i else 12 + i
 
 
@@ -342,6 +343,57 @@ let from_string str =
       day_w = Wed;
       time_d = {
         hour = String.sub str 11 2 |> int_of_string |> clock_to_military (String.sub str 17 2);
-        minute = String.sub str 11 2 |> int_of_string |> min_to_quarters;
+        minute = String.sub str 14 2 |> int_of_string |> min_to_quarters;
       }
     }
+
+(** [month_to_int m] is the integer representation of [m]. *)
+let month_to_int m = 
+  match m with 
+  | Jan -> 1
+  | Feb -> 2
+  | Mar -> 3
+  | Apr -> 4
+  | May -> 5
+  | Jun -> 6
+  | Jul -> 7
+  | Aug -> 8
+  | Sep -> 9
+  | Oct -> 10
+  | Nov -> 11
+  | Dec -> 12
+
+(** [min_to_int m] is the integer representation of [m] *)
+let min_to_int m = 
+  match m with 
+  | T0 -> 0
+  | T15 -> 15
+  | T30 -> 30
+  | T45 -> 45
+
+
+let occurs_before t1 t2 =
+  (* handle years first *)              
+  let years = compare t1.year t2.year in
+  if years > 0 then false 
+  else if years < 0 then true
+  (* same year, handle months *)  
+  else let months = compare (month_to_int t1.month) (month_to_int t2.month) in
+    if months > 0 then false 
+    else if months < 0 then true
+    (* same year and month, handle day *)  
+    else let day = compare t1.day_m t2.day_m in
+      if day > 0 then false 
+      else if day < 0 then true
+      (* same year and month and day, handle hour *)  
+      else let hour = compare t1.time_d.hour t2.time_d.hour in
+        if hour > 0 then false 
+        else if hour < 0 then true
+        (* same year and month and day and hour, handle minute *)  
+        else let min = compare 
+                 (min_to_int t1.time_d.minute) (min_to_int t2.time_d.minute) in
+          if hour > 0 then false 
+          else if hour < 0 then true
+          (* same exact time*)  
+          else false
+
