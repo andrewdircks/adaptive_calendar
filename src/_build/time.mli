@@ -67,3 +67,6 @@ val from_string : string -> t
 (** [occurs_before d1 d2] is true if [d1] is earlier thatn [d2] and 
     false otherwise. *)
 val occurs_before : t -> t -> bool
+
+(** [compare_time t1 t2] implements the standard comparison function for times. *)
+val compare_time : t -> t -> int

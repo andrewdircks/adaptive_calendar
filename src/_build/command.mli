@@ -1,4 +1,3 @@
-
 (** 
    Parsing of user commands.
 *)
@@ -10,7 +9,7 @@ exception CommandDNE
 exception InvalidDate
 
 (** Raised if an arry of undesired length is entered. *)
-exception MalformedArray
+exception MalformedList
 
 (** Raised if an empty event name is entered. *)
 exception EmptyEventName
@@ -21,20 +20,18 @@ exception StartAfterEnd
 (** Raised if a date string is not in the proper form. *)
 exception InvalidDateString
 
-(** The type representing a calendar date. *)
-type date_phrase 
+(** Raised if an invalid field to be edited is inputted. *)
+exception InvalidField
 
 (** The type representing main user commands. *)
-type command 
-
-(** The type representing [Add] commands.*)
-type add_command 
-
-(** The type representing [Delete] commands. *)
-type delete_command 
-
-(** The type representing [Delete] commands. *)
-type edit_command 
+type command = 
+  | Add 
+  | Delete 
+  | Edit 
+  | View
+  | Previous
+  | Next
+  | Save
 
 (** [main_parse str] parses a player's input into a command. Any capitilizations 
     of valid commands (i.e. words in type [command]) are valid.
@@ -50,7 +47,7 @@ val main_parse : string -> command
             [InvalidDateString] if the inputted date strings are not in correct form.
             [StartAfterEnd] if the start date is after the end date. 
             [MalformedList] if [str] is not a list of length four. *)
-val add_parse : string array -> Calendar.event
+val add_parse : string list -> Calendar.event
 
 (** [delete_parse str] parses a player's input into an event title and start date
     tuple representing the event to be deleted from the current calendar.
@@ -60,18 +57,19 @@ val add_parse : string array -> Calendar.event
             [MalformedList] if [str] is not a list of length two. 
             [EmptyEventName] if no event name is entered. 
             [InvalidDateString] if the inputted date string is not in correct form.*)
-val delete_parse : string array -> Calendar.event
+val delete_parse : string list -> (string * Time.t)
 
-(** [edit_parse str] parses a player's input into a record with fields 
-    "old" : (string, Time.t) and "new" : event. 
-    The "old" field holds the name and start time of the event to be edited.
-    The "new" field holds the event after editing. 
+(** [edit_parse str] is a tuple (oldname, oldstarttime, field, change) in which
+    "oldname" represents the name of the event to be edited, "oldstarttime" 
+    represents the start time of the event to be edited, "field" is the field
+    to be changed in the event, and "change" is the new respective value in
+    that field.
     Requires: [str] is a list as such: 
               [old name; old start date; field to edit; new value].
     Raises: [InvalidDate] if an invalid date is entered. 
-            [MalformedList] if [str] is not a list of length two. 
+            [MalformedList] if [str] is not a list of length 4. 
             [EmptyEventName] if no event name is entered. 
             [InvalidDateString] if the inputted date string is not in correct form.*)
-val edit_parse : string array -> Calendar.event
+val edit_parse : string list -> (string * Time.t * string * string)
 
 

@@ -1,10 +1,10 @@
-MODULES=calendar time command state main
+MODULES=calendar time command main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
-OCAMLBUILD=ocamlbuild -use-ocamlfind
+OCAMLBUILD=ocamlbuild -use-ocamlfind 
 
 default: build
 	utop
@@ -17,3 +17,6 @@ test:
 
 cal:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+
+clean:
+	ocamlbuild -clean

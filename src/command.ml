@@ -14,6 +14,8 @@ exception EmptyEventName
 
 exception StartAfterEnd
 
+exception InvalidField
+
 type command = 
   | Add 
   | Delete 
@@ -71,27 +73,27 @@ let handle_date_input s1 s2 =
   if not (is_valid_date_string s1) then raise InvalidDateString
   else if not (is_valid_date_string s1) then raise InvalidDateString 
   else 
-    let d1 = Time.from_string s1 in 
+    let asdf = Time.from_string s1 in 
     let d2 = Time.from_string s2 in
     (* determine if d1 and d2 are valid dates *)
-    if not (Time.is_valid d1) || not (Time.is_valid d2) then raise InvalidDate 
+    if not (Time.is_valid asdf) || not (Time.is_valid d2) then raise InvalidDate 
     (* determine if d1 occurs before d2 *)
-    else if not (Time.occurs_before d1 d2) then raise StartAfterEnd 
-    else (d1,d2)
+    else if not (Time.occurs_before asdf d2) then raise StartAfterEnd 
+    else (asdf,d2)
 
-let add_parse input = 
+let add_parse input : Calendar.event = 
   if List.length input <> 4 then raise MalformedList
   else 
     (* handle event name input *)
-    let name = List.hd input in 
+    let name = List.nth input 0 in 
     if String.length name = 0 then raise EmptyEventName
     (* handle start and end time input *)
     else 
-      let start = List.hd (List.tl input) in 
-      let en = List.hd (List.tl (List.tl input)) in 
+      let start = List.nth input 1 in 
+      let en = List.nth input 2 in 
       let timeframe = handle_date_input start en in 
       (* handle description input *)
-      let description = List.hd List.tl ((List.tl (List.tl input))) in 
+      let description = List.nth input 3 in 
 
       {
         starts = fst timeframe;
@@ -104,18 +106,57 @@ let delete_parse input =
   if List.length input <> 2 then raise MalformedList
   else 
     (* handle event name input *)
-    let name = List.hd input in 
+    let name = List.nth input 0 in 
     if String.length name = 0 then raise EmptyEventName 
     else 
       (* handle start time input *)
-      let start = List.hd (List.tl input) in 
+      let start = List.nth input 1 in 
       if not (is_valid_date_string start) then raise InvalidDateString
       else 
         let d = Time.from_string start in
-        if not (Time.is_valid d1) then raise InvalidDate 
+        if not (Time.is_valid d) then raise InvalidDate 
         else (name,d)
 
+(** [ensure_valid_field f] is [f] in all lowercase if [f] is the string 
+    "name" "description" "start" or "end".
+    Raises: [InvalidField] if [f] is not either of these strings. *)
+let ensure_valid_field f = 
+  let lc = String.lowercase_ascii f in
+  if (lc <> "description" || lc <> "name" || lc <> "start" || lc <> "end")
+  then raise InvalidField else lc
 
+(** [ensure_valid_change c f] is [c] if [c] is an appropriate change for field 
+    [f].
+    Requires: [f] is a valid field in all lowercase. 
+    Raises: [InvalidEdit]  *)
+let ensure_valid_change c f = 
+  (* handle name editing *)
+  if f = "name" then 
+    (if c = "" then raise EmptyEventName else c) 
 
+  (* handle start or end time editing *)
+  else if f = "start" || f = "end" then 
+    (if not (is_valid_date_string c) then raise InvalidDateString else c)
+
+  (* descriptions always valid *)
+  else c
+
+let edit_parse input = 
+  if List.length input <> 2 then raise MalformedList
+  else 
+    try
+      let eventToEdit = delete_parse ([List.nth input 0; List.nth input 1]) in 
+      let fieldToEdit = ensure_valid_field (List.nth input 2) in 
+      let newField = ensure_valid_change (List.nth input 3) fieldToEdit in
+
+      (* return respective tuple *)
+      (fst eventToEdit, snd eventToEdit, fieldToEdit, newField)
+
+    with 
+    | InvalidDate -> raise InvalidDate
+    | MalformedList -> raise MalformedList 
+    | EmptyEventName -> raise EmptyEventName 
+    | InvalidDateString -> raise InvalidDateString
+    | InvalidField -> raise InvalidField
 
 
