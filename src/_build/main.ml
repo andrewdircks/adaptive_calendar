@@ -1,7 +1,4 @@
-open Calendar
-open Command
-open ANSITerminal
-
+(**
 let print_InvalidDate x = 
   ANSITerminal.(print_string [red] "The date you entered does not exist. Enter again. \n")
 
@@ -111,10 +108,10 @@ let rec edit_instructions x =
   | StartAfterEnd -> print_StartAfterEnd; edit_instructions 1
   | InvalidDateString -> print_InvalidDateString; edit_instructions 1
 
-let stoppingpoint x = Stdlib.print_string ("heres where we stop")
+let stoppingpoint x = Stdlib.print_string ("heres where we stop");
 
 (** [play c] is the primary recursive function for playing this application.*) 
-let rec play c = 
+let play c = 
   match main_instructions 1 with  
   (* | Add -> add_instructions |> Calendar.add_event c *)
   | Add -> add_instructions |> stoppingpoint
@@ -122,18 +119,18 @@ let rec play c =
   | Delete -> delete_instructions |> stoppingpoint
   (* | Edit -> edit_instructions |> Calendar.edit_event c *)
   | Edit -> edit_instructions |> stoppingpoint
-  | _ -> ANSITerminal.(print_string [red] "taf")
-
+  | _ -> ANSITerminal.(print_string [red] "taf");
+*)
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to the Adaptive Calender system.\n");
-  Stdlib.print_endline "What do you want to do?\n";
+  print_endline "What do you want to do?\n"
   (* Stdlib.print_string  "> ";
      match read_line () with
      | exception End_of_file -> ()
      | file_name -> () *)
-  play 1
+  (*play 1 *)
 
 (* Execute the game engine. *)
 let () = main ()
