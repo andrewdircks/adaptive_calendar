@@ -2,27 +2,25 @@ open OUnit2
 open Calendar
 open Command
 open State
-(** 
-let get_adventure jfile =
-  Yojson.Basic.from_file jfile |> from_json
 
-Load both provided sample files
-let cal_test = get_adventure "lonely_room.json"*)
 
-let maketst 
-    (name : string): test =
+
+let cal_test = parse_file "test_calendar.json"
+
+let calname_test 
+    (name : string) (caldesc: string) (cal:Calendar.t): test =
     name >:: (fun _ ->
-    (assert_equal 1 2)
+    (assert_equal cal_test.calname caldesc)
     )
 
-let file_tests = 
+let calender_tests = 
   [
-    maketst "running test" 
+    calname_test "test_calendar.json name" "Andrew and Sam - CS3110 MS1" cal_test;
   ]
 
 let suite =
   "Test Suite For Adaptive Calendar"  >::: List.flatten [
-    file_tests;
+    calender_tests;
   ]
 
 let _ = run_test_tt_main suite

@@ -13,13 +13,13 @@ type day_m = int
 type day_w = Sun | Mon | Tue | Wed | Thu | Fri | Sat
 
 (** Type representing time of minutes. We only represent times in 15 minute 
-    intervals. *)
-type time_m = T0 | T15 | T30 | T45
+    intervals. 
+type time_m = T0 | T15 | T30 | T45*)
 
 (** Type representing time of day. Valid range for hour: 0..23 *)
 type time_d = {
   hour : int;
-  minute : time_m;
+  minute : int;
 }
 
 type t = {
@@ -29,6 +29,19 @@ type t = {
   day_w : day_w;
   time_d : time_d;
 }
+
+let week_to_int wk = 
+  match wk with
+  | Mon -> 1
+  | Tue -> 2
+  | Wed -> 3
+  | Thu -> 4
+  | Fri -> 5
+  | Sat -> 6
+  | Sun -> 0
+
+
+
 
 let is_leap_year = 
   let y = (Unix.time() |> Unix.localtime).tm_year + 1900 in 
@@ -308,11 +321,12 @@ let dayw_from_int (d : int) : day_w =
 
 (** [min_to_quarters m] the [time_m] analog of [m], with rounding down.
     Requires: [m] is between 0 and 60. *)
+
 let min_to_quarters (m : int) : time_m = 
-  if m < 15 then T0 
-  else if m < 30 then T15 
-  else if m < 45 then T30 
-  else T45
+  if m < 15 then 0 
+  else if m < 30 then 15 
+  else if m < 45 then 30 
+  else 45
 
 let now =
   let tm = Unix.localtime (Unix.time()) in 
@@ -325,28 +339,20 @@ let now =
       minute = min_to_quarters tm.tm_min;
     } } 
 
-(** [clocl_to_military i ampm] the hour in military time that [i] represents.
-    Requires: [ampm] is either "am" or "pm". *)
-let clock_to_military (ampm : string) (i : int) : int = 
-  if (String.lowercase_ascii ampm <> "am" && String.lowercase_ascii ampm <> "pm") 
-  then failwith "not am or pm" else
-  if (ampm = "am") then i else 12 + i
 
-
-(* "mm/dd/yyyy/hh:zz/xx" *)
+(* from_string already military time "mm/dd/yyyy/hh:zz/0" *)
 let from_string str = 
-  if String.length str <> 19 then failwith "invalid string length" else 
+  if String.length str <> 18 then failwith ("invalid string length: " ^ str) else 
     {
       year = String.sub str 6 4 |> int_of_string;
       month = String.sub str 0 2 |> int_of_string |> month_from_int;
       day_m = String.sub str 3 2 |> int_of_string;
-      day_w = Wed;
+      day_w = String.sub str 17 1 |> int_of_string |> dayw_from_int;
       time_d = {
-        hour = String.sub str 11 2 |> int_of_string |> clock_to_military (String.sub str 17 2);
-        minute = String.sub str 14 2 |> int_of_string |> min_to_quarters;
+        hour = String.sub str 11 2 |> int_of_string ;
+        minute = String.sub str 14 2 |> int_of_string ;
       }
     }
-
 (** [month_to_int m] is the integer representation of [m]. *)
 let month_to_int m = 
   match m with 
@@ -363,13 +369,23 @@ let month_to_int m =
   | Nov -> 11
   | Dec -> 12
 
-(** [min_to_int m] is the integer representation of [m] *)
+
+let rec addzeros count term = 
+  if String.length term < count then addzeros count ("0" ^ term) 
+  else term
+
+
+let time_to_string (tm:t):string =
+  match tm with
+  | {year = yr; month = mn; day_m = dm; day_w = dw; time_d = {hour = hr; minute = min}} ->
+  (mn |> month_to_int |> string_of_int |> addzeros 2) ^ "/" ^
+  (string_of_int dm |> addzeros 2 ) ^ "/" ^
+  (string_of_int yr |> addzeros 4) ^ "/" ^ 
+  (string_of_int hr |> addzeros 2) ^  ":" ^
+  (string_of_int min |> addzeros 2) ^ "/" ^ (week_to_int dw |> string_of_int )
+  
 let min_to_int m = 
-  match m with 
-  | T0 -> 0
-  | T15 -> 15
-  | T30 -> 30
-  | T45 -> 45
+  m
 
 
 let occurs_before t1 t2 =

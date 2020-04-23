@@ -64,6 +64,11 @@ val now : t
     the minute number, and xx is either "AM" or "PM".*)
 val from_string : string -> t
 
+(**
+    [to_string tm] is the time value as a string
+*)
+val to_string : t -> string
+
 (** [occurs_before d1 d2] is true if [d1] is earlier thatn [d2] and 
     false otherwise. *)
 val occurs_before : t -> t -> bool

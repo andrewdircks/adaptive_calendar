@@ -1,4 +1,4 @@
-MODULES=calendar time command main
+MODULES=calendar time command main state
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

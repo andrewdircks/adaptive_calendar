@@ -335,7 +335,7 @@ let clock_to_military (ampm : string) (i : int) : int =
 
 (* "mm/dd/yyyy/hh:zz/xx" *)
 let from_string str = 
-  if String.length str <> 19 then failwith "invalid string length" else 
+  if String.length str <> 19 then failwith ("invalid string length: " ^ str) else 
     {
       year = String.sub str 6 4 |> int_of_string;
       month = String.sub str 0 2 |> int_of_string |> month_from_int;

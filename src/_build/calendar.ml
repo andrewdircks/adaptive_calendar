@@ -1,6 +1,8 @@
 open Yojson.Basic.Util
 open Time
 
+
+
 type event =  {
   starts : Time.t;
   ends : Time.t;
@@ -8,6 +10,7 @@ type event =  {
   description : string;
 }
 
+(**
 module Event_Time_Pairs = 
 struct
   type t = (string * Time.t)
@@ -15,7 +18,7 @@ struct
 end
 
 module EventMap = Map.Make(Event_Time_Pairs)
-
+*)
 (* RI : no two events have the same start time and end date. *)
 type t = {
   calname: string;
@@ -24,37 +27,60 @@ type t = {
 
 exception EventDNE
 
+
+
 (** [event_of_json ejson] is the event that [ejson] represents. 
     Requires: [ejson] is a valid JSON calendar-event representation. *)
 let event_of_json (ejson : Yojson.Basic.t) : event = 
   {
-    starts = ejson |> member "starts" |> to_string |> Time.from_string;
-    ends = ejson |> member "ends" |> to_string |> Time.from_string;
-    name = ejson |> member "name" |> to_string;
-    description = ejson |> member "description" |> to_string;
+    starts = ejson |> member "starts" |> Yojson.Basic.to_string |> Time.from_string;
+    ends = ejson |> member "ends" |> Yojson.Basic.to_string  |> Time.from_string;
+    name = ejson |> member "name" |> Yojson.Basic.to_string ;
+    description = ejson |> member "description" |> Yojson.Basic.to_string ;
   }
 
 let from_json json = 
   {
     events = json |> member "events" |> to_list |> List.map event_of_json;
-    calname = json |> member "calname" |> to_string;
+    calname = json |> member "calname" |> Yojson.Basic.to_string;
   }
 
 
-let parse_file fname = 
+let parse_file (fname:string) : t = 
   Yojson.Basic.from_file fname |> from_json
 
+let rec events_to_string (evtlist: event list) = 
+  if (List.length evtlist = 0) then "" else
+    let curevt = List.hd evtlist in 
+    "    {\n      \"starts\": \"" ^ 
+    Time.time_to_string curevt.starts ^
+  "\",\n      \"ends\": \"" 
+  ^ Time.time_to_string curevt.ends ^
+  "\",\n      \"name\": \"" ^ curevt.name ^
+  "\",\n      \"description\": \"" ^ curevt.description ^
+  "\"\n    }" ^ 
 
-let to_json = failwith "unimplemented"
+  (match evtlist with 
+  | [] -> "\n"
+  | h::g -> ",\n" ^ events_to_string g)
+
+
+let to_json_string (cal: t) : string = 
+  "{\n  \"events\": [\n" ^ 
+  events_to_string cal.events ^ 
+  "  ],\n  \"calname\": \"" ^ cal.calname
+  ^ "\"\n}"
+
+(**let to_json = failwith "unimplemented"
 
 let get_events = failwith "unimplemented"
 
-let todays_events = failwith "unimplemented"
+let todays_events = failwith "unimplemented"*)
 
 (* (** [find_event name time c] is the event in [c] with name [name] and start time
     [time].
     Raises: [EventDNE] if no such event exists. *)
-   let rec find_event (name : string) (time : Time.t) =  *)
+   let rec find_event (name : string) (time : Time.t) =  
 
 
 let add_event = failwith "unimplemented"
@@ -63,7 +89,7 @@ let delete_event = failwith "unimplemented"
 
 let replace_event = failwith "unimplemented"
 
-let event_from_name_date = failwith "unimplemented"
+let event_from_name_date = failwith "unimplemented"*)
 
 let change_name n c = 
   {
