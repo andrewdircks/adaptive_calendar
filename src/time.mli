@@ -11,17 +11,11 @@ type month = Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | D
 (** Type representing days of the month. *)
 type day_m = int
 
-(** Type representing days of the week. *)
-type day_w = Sun | Mon | Tue | Wed | Thu | Fri | Sat
-
-(** Type representing time of minutes. We choose to represent times in 15 minute 
-    intervals. *)
-type time_m = T0 | T15 | T30 | T45
 
 (** Type representing time of day. Valid range for hour: 0..23 *)
 type time_d = {
   hour : int;
-  minute : time_m;
+  minute : int;
 }
 
 (** Abstract type representing date and time. *)
@@ -29,7 +23,6 @@ type t = {
   year : year;
   month : month;
   day_m : day_m;
-  day_w : day_w;
   time_d : time_d;
 }
 
@@ -57,17 +50,26 @@ val is_leap_year : bool
 (** [now] is the current date and time of the user. *)
 val now : t
 
-(** [from_string str] is the date and time value of [str].
+(** [from_json_string str] is the date and time value of [str], as stored in json 
+    files. Note, the time is in military time.
+    Requires: [str] is in the format "mm/dd/yyyy/hh:zz/0": 
+    where mm represents the month number, dd represents the day number,
+    yyyy represents the year number, hh represents the hour number, zz represents
+    the minute number.*)
+val from_json_string : string -> t
+
+(** [from_json_string str] is the date and time value of [str], as stored in json 
+    files. 
     Requires: [str] is in the format "mm/dd/yyyy/hh:zz/xx": 
     where mm represents the month number, dd represents the day number,
     yyyy represents the year number, hh represents the hour number, zz represents
-    the minute number, and xx is either "AM" or "PM".*)
-val from_string : string -> t
+    the minute number, and xx is am or pm.*)
+val from_input_string : string -> t
 
 (**
     [to_string tm] is the time value as a string
 *)
-val to_string : t -> string
+val time_to_string : t -> string
 
 (** [occurs_before d1 d2] is true if [d1] is earlier thatn [d2] and 
     false otherwise. *)

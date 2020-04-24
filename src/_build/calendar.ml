@@ -1,8 +1,6 @@
 open Yojson.Basic.Util
 open Time
 
-
-
 type event =  {
   starts : Time.t;
   ends : Time.t;
@@ -11,13 +9,13 @@ type event =  {
 }
 
 (**
-module Event_Time_Pairs = 
-struct
-  type t = (string * Time.t)
-  let compare e1 e2 = Time.compare_time (snd e1) (snd e2)
-end
+   module Event_Time_Pairs = 
+   struct
+   type t = (string * Time.t)
+   let compare e1 e2 = Time.compare_time (snd e1) (snd e2)
+   end
 
-module EventMap = Map.Make(Event_Time_Pairs)
+   module EventMap = Map.Make(Event_Time_Pairs)
 *)
 (* RI : no two events have the same start time and end date. *)
 type t = {
@@ -27,24 +25,25 @@ type t = {
 
 exception EventDNE
 
+exception CannotAddExisting
 
+exception MalformedTuple
 
 (** [event_of_json ejson] is the event that [ejson] represents. 
     Requires: [ejson] is a valid JSON calendar-event representation. *)
 let event_of_json (ejson : Yojson.Basic.t) : event = 
   {
-    starts = ejson |> member "starts" |> Yojson.Basic.to_string |> Time.from_string;
-    ends = ejson |> member "ends" |> Yojson.Basic.to_string  |> Time.from_string;
-    name = ejson |> member "name" |> Yojson.Basic.to_string ;
-    description = ejson |> member "description" |> Yojson.Basic.to_string ;
+    starts = ejson |> member "starts" |> to_string |> Time.from_json_string;
+    ends = ejson |> member "ends" |> to_string  |> Time.from_json_string;
+    name = ejson |> member "name" |> to_string ;
+    description = ejson |> member "description" |> to_string ;
   }
 
 let from_json json = 
   {
     events = json |> member "events" |> to_list |> List.map event_of_json;
-    calname = json |> member "calname" |> Yojson.Basic.to_string;
+    calname = json |> member "calname" |> to_string;
   }
-
 
 let parse_file (fname:string) : t = 
   Yojson.Basic.from_file fname |> from_json
@@ -54,15 +53,15 @@ let rec events_to_string (evtlist: event list) =
     let curevt = List.hd evtlist in 
     "    {\n      \"starts\": \"" ^ 
     Time.time_to_string curevt.starts ^
-  "\",\n      \"ends\": \"" 
-  ^ Time.time_to_string curevt.ends ^
-  "\",\n      \"name\": \"" ^ curevt.name ^
-  "\",\n      \"description\": \"" ^ curevt.description ^
-  "\"\n    }" ^ 
+    "\",\n      \"ends\": \"" 
+    ^ Time.time_to_string curevt.ends ^
+    "\",\n      \"name\": \"" ^ curevt.name ^
+    "\",\n      \"description\": \"" ^ curevt.description ^
+    "\"\n    }" ^ 
 
-  (match evtlist with 
-  | [] -> "\n"
-  | h::g -> ",\n" ^ events_to_string g)
+    (match evtlist with 
+     | [] -> "\n"
+     | h::g -> ",\n" ^ events_to_string g)
 
 
 let to_json_string (cal: t) : string = 
@@ -71,25 +70,54 @@ let to_json_string (cal: t) : string =
   "  ],\n  \"calname\": \"" ^ cal.calname
   ^ "\"\n}"
 
+
 (**let to_json = failwith "unimplemented"
 
-let get_events = failwith "unimplemented"
+   let get_events = failwith "unimplemented"
 
-let todays_events = failwith "unimplemented"*)
+   let todays_events = failwith "unimplemented"*)
 
 (* (** [find_event name time c] is the event in [c] with name [name] and start time
     [time].
     Raises: [EventDNE] if no such event exists. *)
-   let rec find_event (name : string) (time : Time.t) =  
+   let rec find_event (name : string) (time : Time.t) =   *)
 
+(** [mem name start events] is true if there exists an event in [events] with 
+    start time [start] and name [name]. False otherwise. *) 
+let rec mem (name : string) (start : Time.t) (events : event list) : bool = 
+  match events with 
+  | [] -> false
+  | h::t -> 
+    if (h.name = name && h.starts = start) then true 
+    else mem name start t
 
-let add_event = failwith "unimplemented"
+let add_event c e = 
+  print_string (e.starts |> time_to_string);
+  if (mem e.name e.starts c.events) then raise CannotAddExisting
+  else 
+    { calname = c.calname; events = (e :: c.events)}
 
-let delete_event = failwith "unimplemented"
+(** [delete_event_from_list info events not] is a tuple with first element
+    as the event that was delted and second element [events] without the event 
+    identified by the (name, start) in [info]. 
+    Raises: [EventDNE] if there is no such event *)
+let rec delete_event_from_list info events not = 
+  match events with 
+  | [] -> raise EventDNE
+  | h::t -> 
+    if (h.name = fst info && h.starts = snd info) 
+    then (h, not@t)
+    else delete_event_from_list info t (h::not)
 
-let replace_event = failwith "unimplemented"
-
-let event_from_name_date = failwith "unimplemented"*)
+let delete_event c info = 
+  try (
+    let leftover = (delete_event_from_list info c.events []) in
+    {
+      calname = c.calname;
+      events = snd leftover;
+    }
+  )
+  with EventDNE -> raise EventDNE
 
 let change_name n c = 
   {
@@ -109,7 +137,7 @@ let change_description d c =
 
 let change_start_time st c = 
   {
-    starts = st;
+    starts = st |> Time.toGMT;
     ends = c.ends;
     name = c.name;
     description = c.description;
@@ -118,7 +146,39 @@ let change_start_time st c =
 let change_end_time et c = 
   {
     starts = c.starts;
-    ends = et;
+    ends = et |> Time.toGMT;
     name = c.name;
     description = c.description;
   }
+
+let firsttwo_from_tuple x = 
+  match x with 
+  | (name, start, _, _) -> (name, start)
+
+let third_from_tuple x = 
+  match x with 
+  | (_, _, third, _) -> third
+
+let fourth_from_tuple x = 
+  match x with 
+  | (_, _, _, fourth) -> fourth
+
+let edit_event c info = 
+  try ( 
+    let leftover = (delete_event_from_list (firsttwo_from_tuple info) c.events []) in
+    let field = third_from_tuple info in 
+    let value = fourth_from_tuple info in 
+    let new_event = 
+      if field = "name" then change_name value (fst leftover) 
+      else if field = "description" then change_description value (fst leftover) 
+      else if field = "start" then change_start_time (value |> Time.from_json_string) (fst leftover)
+      else if field = "end" then change_end_time (value |> Time.from_json_string) (fst leftover)
+      else raise EventDNE
+    in 
+    {
+      calname = c.calname;
+      events = new_event :: (snd leftover)
+    }
+  )
+  with 
+  | EventDNE -> raise EventDNE 

@@ -9,24 +9,20 @@ type month = Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | D
 (** Type representing days of the month. Valid range: 1..31*)
 type day_m = int
 
-(** Type representing days of the week. *)
-type day_w = Sun | Mon | Tue | Wed | Thu | Fri | Sat
-
 (** Type representing time of minutes. We only represent times in 15 minute 
-    intervals. *)
-type time_m = T0 | T15 | T30 | T45
+    intervals. 
+    type time_m = T0 | T15 | T30 | T45*)
 
 (** Type representing time of day. Valid range for hour: 0..23 *)
 type time_d = {
   hour : int;
-  minute : time_m;
+  minute : int;
 }
 
 type t = {
   year : year;
   month : month;
   day_m : day_m;
-  day_w : day_w;
   time_d : time_d;
 }
 
@@ -48,33 +44,11 @@ let is_valid d =
   let td = (d.time_d.hour >= 0 && d.time_d.hour < 24) in 
   y && dm && td
 
-(** [is_ahead_year local gm] is true if the [local] year is "ahead" of the [gm] 
-    day.*)
-let is_ahead_year (local : Unix.tm) (gm : Unix.tm) = 
-  if local.tm_year - gm.tm_year > 0 then true else false
-
-(** [is_ahead_day local gm] is true if the [local] day is "ahead" of the [gm] 
-    day.*)
-let is_ahead_day (local : Unix.tm) (gm : Unix.tm) = 
-  if local.tm_year - gm.tm_year <> 0 then is_ahead_year local gm 
-  else if local.tm_yday - gm.tm_yday > 0 then true else false
-
-(** [is_ahead local gm] is true if [local] time is "ahead" of [gm] time, i.e. 
-    there is a positive time zone difference. *)
-let is_ahead (local : Unix.tm) (gm : Unix.tm) = 
-  if local.tm_yday - gm.tm_yday <> 0 then is_ahead_day local gm 
-  else if local.tm_hour - gm.tm_hour > 0 then true else false
-
 let difference = 
-  let t = Unix.time() in
-  let local = Unix.localtime t in
-  let gm = Unix.gmtime t in 
-  if is_ahead local gm then 
-    (if is_ahead_day local gm then local.tm_hour + (24 - gm.tm_hour) 
-     else local.tm_hour - gm.tm_hour)
-  else 
-    (if is_ahead_day gm local then gm.tm_hour + (24 - local.tm_hour) 
-     else local.tm_hour - gm.tm_hour)
+  let now = Unix.time () in 
+  let gmt = fst (Unix.mktime (Unix.gmtime now)) in
+  let local = fst (Unix.mktime (Unix.localtime now))
+  in ((local -. gmt) /. (60. *. 60.)) |> Float.to_int
 
 (** [increment_month d] is [d] with its month incremented and day of month 
     set to 1. *)
@@ -100,7 +74,6 @@ let increment_month (d : t) : t =
     { year = d.year + 1;
       month = m';
       day_m = 1;
-      day_w = d.day_w;
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -109,7 +82,6 @@ let increment_month (d : t) : t =
     { year = d.year;
       month = m';
       day_m = 1;
-      day_w = d.day_w;
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -140,7 +112,6 @@ let decrement_month (d : t) : t =
       { year = d.year;
         month = m';
         day_m = 29;
-        day_w = d.day_w;
         time_d = {
           hour = d.time_d.hour;
           minute = d.time_d.minute;
@@ -149,7 +120,6 @@ let decrement_month (d : t) : t =
       { year = d.year;
         month = m';
         day_m = 28;
-        day_w = d.day_w;
         time_d = {
           hour = d.time_d.hour;
           minute = d.time_d.minute;
@@ -159,7 +129,6 @@ let decrement_month (d : t) : t =
     { year = d.year;
       month = m';
       day_m = 31;
-      day_w = d.day_w;
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -169,7 +138,6 @@ let decrement_month (d : t) : t =
     { year = d.year - 1;
       month = m';
       day_m = 31;
-      day_w = d.day_w;
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -179,7 +147,6 @@ let decrement_month (d : t) : t =
     { year = d.year;
       month = m';
       day_m = 30;
-      day_w = d.day_w;
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -187,22 +154,10 @@ let decrement_month (d : t) : t =
 
 (** [increment_day d] is [d] with its days of the month and week incremented. *)
 let increment_day (d : t) : t = 
-  let dw' = 
-    match d.day_w with 
-    | Sun -> Mon
-    | Mon -> Tue
-    | Tue -> Wed
-    | Wed -> Thu
-    | Thu -> Fri
-    | Fri -> Sat
-    | Sat -> Sun
-  in 
-  (* increase day of month and week *)
   let d' = 
     { year = d.year;
       month = d.month;
       day_m = d.day_m + 1;
-      day_w = dw';
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -213,22 +168,11 @@ let increment_day (d : t) : t =
 
 (** [decrement_day d] is [d] with its days of the month and week decremented. *)
 let decrement_day (d : t) : t = 
-  let dw' = 
-    match d.day_w with 
-    | Sun -> Sat
-    | Mon -> Sun
-    | Tue -> Mon
-    | Wed -> Tue
-    | Thu -> Wed
-    | Fri -> Thu
-    | Sat -> Fri
-  in 
   (* decrease day of month and week *)
   let d' = 
     { year = d.year;
       month = d.month;
       day_m = d.day_m - 1;
-      day_w = dw';
       time_d = {
         hour = d.time_d.hour;
         minute = d.time_d.minute;
@@ -247,7 +191,6 @@ let increment_hour (d : t) (dt : int) : t =
     increment_day { year = d.year;
                     month = d.month;
                     day_m = d.day_m;
-                    day_w = d.day_w;
                     time_d = {
                       hour = h'-24;
                       minute = d.time_d.minute;
@@ -258,7 +201,6 @@ let increment_hour (d : t) (dt : int) : t =
     decrement_day { year = d.year;
                     month = d.month;
                     day_m = d.day_m;
-                    day_w = d.day_w;
                     time_d = {
                       hour = d.time_d.hour + 23;
                       minute = d.time_d.minute;
@@ -268,7 +210,6 @@ let increment_hour (d : t) (dt : int) : t =
   else { year = d.year;
          month = d.month;
          day_m = d.day_m;
-         day_w = d.day_w;
          time_d = {
            hour = h';
            minute = d.time_d.minute;
@@ -295,55 +236,56 @@ let month_from_int (m : int) : month =
   else if m = 11 then Nov 
   else Dec
 
-(** [dayw_from_int d] the [day_w] analog of [d].
-    Requires: [d] is between 0 and 6. *)
-let dayw_from_int (d : int) : day_w = 
-  if d = 0 then Sun
-  else if d = 1 then Mon
-  else if d = 2 then Tue
-  else if d = 3 then Wed
-  else if d = 4 then Thu 
-  else if d = 5 then Fri
-  else Sat
-
 (** [min_to_quarters m] the [time_m] analog of [m], with rounding down.
     Requires: [m] is between 0 and 60. *)
-let min_to_quarters (m : int) : time_m = 
-  if m < 15 then T0 
-  else if m < 30 then T15 
-  else if m < 45 then T30 
-  else T45
+
+(* let min_to_quarters (m : int) : time_m = 
+   if m < 15 then 0 
+   else if m < 30 then 15 
+   else if m < 45 then 30 
+   else 45 *)
 
 let now =
   let tm = Unix.localtime (Unix.time()) in 
   { year = tm.tm_year + 1900;
     month = month_from_int (tm.tm_mon+1);
     day_m = tm.tm_mday;
-    day_w = dayw_from_int tm.tm_wday;
     time_d = {
       hour = tm.tm_hour;
-      minute = min_to_quarters tm.tm_min;
+      minute = tm.tm_min;
     } } 
 
-(** [clocl_to_military i ampm] the hour in military time that [i] represents.
-    Requires: [ampm] is either "am" or "pm". *)
-let clock_to_military (ampm : string) (i : int) : int = 
-  if (String.lowercase_ascii ampm <> "am" && String.lowercase_ascii ampm <> "pm") 
-  then failwith "not am or pm" else
-  if (ampm = "am") then i else 12 + i
+
+(* from_string already military time "mm/dd/yyyy/hh:zz" *)
+let from_json_string (str:string) = 
+  if String.length str <> 16 then failwith ("invalid string length: " ^ str) else 
+    {
+      year = String.sub str 6 4 |> int_of_string;
+      month = String.sub str 0 2 |> int_of_string |> month_from_int;
+      day_m = String.sub str 3 2 |> int_of_string;
+      time_d = {
+        hour = String.sub str 11 2 |> int_of_string ;
+        minute = String.sub str 14 2 |> int_of_string ;
+      }
+    }
+
+let to_military ampm hour = 
+  let ap = String.lowercase_ascii ampm in
+  if ap = "am" then hour
+  else if ap = "pm" then hour + 12
+  else failwith ("not am or pm")
 
 
-(* "mm/dd/yyyy/hh:zz/xx" *)
-let from_string str = 
+(* "mm/dd/yyyy/hh:zz/am" *)
+let from_input_string (str:string) = 
   if String.length str <> 19 then failwith ("invalid string length: " ^ str) else 
     {
       year = String.sub str 6 4 |> int_of_string;
       month = String.sub str 0 2 |> int_of_string |> month_from_int;
       day_m = String.sub str 3 2 |> int_of_string;
-      day_w = Wed;
       time_d = {
-        hour = String.sub str 11 2 |> int_of_string |> clock_to_military (String.sub str 17 2);
-        minute = String.sub str 14 2 |> int_of_string |> min_to_quarters;
+        hour = String.sub str 11 2 |> int_of_string |> to_military (String.sub str 17 2);
+        minute = String.sub str 14 2 |> int_of_string ;
       }
     }
 
@@ -363,14 +305,23 @@ let month_to_int m =
   | Nov -> 11
   | Dec -> 12
 
-(** [min_to_int m] is the integer representation of [m] *)
-let min_to_int m = 
-  match m with 
-  | T0 -> 0
-  | T15 -> 15
-  | T30 -> 30
-  | T45 -> 45
 
+let rec addzeros count term = 
+  if String.length term < count then addzeros count ("0" ^ term) 
+  else term
+
+
+let time_to_string (tm:t):string =
+  match tm with
+  | {year = yr; month = mn; day_m = dm; time_d = {hour = hr; minute = min}} ->
+    (mn |> month_to_int |> string_of_int |> addzeros 2) ^ "/" ^
+    (string_of_int dm |> addzeros 2 ) ^ "/" ^
+    (string_of_int yr |> addzeros 4) ^ "/" ^ 
+    (string_of_int hr |> addzeros 2) ^  ":" ^
+    (string_of_int min |> addzeros 2)
+
+let min_to_int m = 
+  m
 
 let occurs_before t1 t2 =
   (* handle years first *)              

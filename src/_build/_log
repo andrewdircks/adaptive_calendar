@@ -1,36 +1,36 @@
 ### Starting build.
-# Target: test.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:test.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules test.ml > test.ml.depends # cached
-# Target: calendar.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:calendar.mli, ocaml, ocamldep, quiet, traverse }
+# Target: main.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:mli, file:main.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules main.mli > main.mli.depends # cached
+# Target: main.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:main.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o main.cmi main.mli # cached
+# Target: main.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:main.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules main.ml > main.ml.depends # cached
+# Target: calendar.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:mli, file:calendar.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules calendar.mli > calendar.mli.depends # cached
-# Target: time.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:time.mli, ocaml, ocamldep, quiet, traverse }
+# Target: time.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:mli, file:time.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules time.mli > time.mli.depends # cached
-# Target: time.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:time.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o time.cmi time.mli # cached
-# Target: calendar.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:calendar.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmi calendar.mli # cached
-# Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
+# Target: time.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:time.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o time.cmi time.mli # cached
+# Target: calendar.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:calendar.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o calendar.cmi calendar.mli # cached
+# Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.mli > command.mli.depends # cached
-# Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o command.cmi command.mli # cached
-# Target: state.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:mli, file:state.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.mli > state.mli.depends # cached
-# Target: state.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli # cached
-# Target: test.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:test.cmo, file:test.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o test.cmo test.ml # cached
-# Target: calendar.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:calendar.ml, ocaml, ocamldep, quiet, traverse }
+# Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o command.cmi command.mli # cached
+# Target: main.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o main.cmo main.ml # cached
+# Target: calendar.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:calendar.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules calendar.ml > calendar.ml.depends # cached
-# Target: command.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:command.ml, ocaml, ocamldep, quiet, traverse }
+# Target: calendar.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:calendar.cmo, file:calendar.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o calendar.cmo calendar.ml # cached
+# Target: command.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:command.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.ml > command.ml.depends # cached
-# Target: state.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), debug, extension:ml, file:state.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.ml > state.ml.depends # cached
-# Target: calendar.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, debug, extension:cmo, extension:ml, file:calendar.cmo, file:calendar.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmo calendar.ml
-+ ocamlfind ocamlc -c -g -package oUnit -package yojson -package ANSITerminal -o calendar.cmo calendar.ml
-File "calendar.ml", line 56, characters 4-23:
-56 |     Time.time_to_string curevt.starts ^
-         ^^^^^^^^^^^^^^^^^^^
-Error: Unbound value Time.time_to_string
-Command exited with code 2.
-# Compilation unsuccessful.
+# Target: command.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:command.cmo, file:command.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o command.cmo command.ml # cached
+# Target: time.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:time.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules time.ml > time.ml.depends # cached
+# Target: time.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:time.cmo, file:time.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o time.cmo time.ml # cached
+# Target: main.byte, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, dont_link_with, extension:byte, file:main.byte, link, ocaml, program, quiet, traverse }
+ocamlfind ocamlc -linkpkg -package oUnit -package yojson -package ANSITerminal time.cmo calendar.cmo command.cmo main.cmo -o main.byte # cached
+# Compilation successful.

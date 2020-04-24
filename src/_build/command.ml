@@ -72,8 +72,8 @@ let handle_date_input s1 s2 =
   if not (is_valid_date_string s1) then raise InvalidDateString
   else if not (is_valid_date_string s1) then raise InvalidDateString 
   else 
-    let asdf = Time.from_string s1 in 
-    let d2 = Time.from_string s2 in
+    let asdf = Time.from_input_string s1 in 
+    let d2 = Time.from_input_string s2 in
     (* determine if d1 and d2 are valid dates *)
     if not (Time.is_valid asdf) || not (Time.is_valid d2) then raise InvalidDate 
     (* determine if d1 occurs before d2 *)
@@ -95,8 +95,8 @@ let add_parse input : Calendar.event =
       let description = List.nth input 3 in 
 
       {
-        starts = fst timeframe;
-        ends = snd timeframe;
+        starts = (fst timeframe) |> Time.toGMT;
+        ends = (snd timeframe) |> Time.toGMT;
         name = name;
         description = description;
       }
@@ -112,16 +112,16 @@ let delete_parse input =
       let start = List.nth input 1 in 
       if not (is_valid_date_string start) then raise InvalidDateString
       else 
-        let d = Time.from_string start in
+        let d = Time.from_input_string start in
         if not (Time.is_valid d) then raise InvalidDate 
-        else (name,d)
+        else (name, d |> Time.toGMT)
 
 (** [ensure_valid_field f] is [f] in all lowercase if [f] is the string 
     "name" "description" "start" or "end".
     Raises: [InvalidField] if [f] is not either of these strings. *)
 let ensure_valid_field f = 
   let lc = String.lowercase_ascii f in
-  if (lc <> "description" || lc <> "name" || lc <> "start" || lc <> "end")
+  if (lc <> "description" && lc <> "name" && lc <> "start" && lc <> "end")
   then raise InvalidField else lc
 
 (** [ensure_valid_change c f] is [c] if [c] is an appropriate change for field 
@@ -141,14 +141,14 @@ let ensure_valid_change c f =
   else c
 
 let edit_parse input = 
-  if List.length input <> 2 then raise MalformedList
+  if List.length input <> 4 then raise MalformedList
   else 
     try
       let eventToEdit = delete_parse ([List.nth input 0; List.nth input 1]) in 
       let fieldToEdit = ensure_valid_field (List.nth input 2) in 
       let newField = ensure_valid_change (List.nth input 3) fieldToEdit in
 
-      (* return respective tuple *)
+      (* return respective tuple, note eventToEdit is already converted to GMT *)
       (fst eventToEdit, snd eventToEdit, fieldToEdit, newField)
 
     with 
@@ -157,5 +157,4 @@ let edit_parse input =
     | EmptyEventName -> raise EmptyEventName 
     | InvalidDateString -> raise InvalidDateString
     | InvalidField -> raise InvalidField
-
 
