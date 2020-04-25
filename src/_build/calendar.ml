@@ -29,6 +29,11 @@ exception CannotAddExisting
 
 exception MalformedTuple
 
+let empty name = {
+  calname= name;
+  events= []
+}
+
 (** [event_of_json ejson] is the event that [ejson] represents. 
     Requires: [ejson] is a valid JSON calendar-event representation. *)
 let event_of_json (ejson : Yojson.Basic.t) : event = 
@@ -61,6 +66,7 @@ let rec events_to_string (evtlist: event list) =
 
     (match evtlist with 
      | [] -> "\n"
+     | h::[] -> "\n"
      | h::g -> ",\n" ^ events_to_string g)
 
 
@@ -71,11 +77,14 @@ let to_json_string (cal: t) : string =
   ^ "\"\n}"
 
 
-(**let to_json = failwith "unimplemented"
+let to_json c = 
+  let newfile = open_out (c.calname ^ ".json") in 
+  Printf.fprintf newfile "%s" (to_json_string c);
+  close_out newfile
 
-   let get_events = failwith "unimplemented"
+(*  let get_events = failwith "unimplemented"
 
-   let todays_events = failwith "unimplemented"*)
+    let todays_events = failwith "unimplemented"*)
 
 (* (** [find_event name time c] is the event in [c] with name [name] and start time
     [time].
@@ -92,7 +101,6 @@ let rec mem (name : string) (start : Time.t) (events : event list) : bool =
     else mem name start t
 
 let add_event c e = 
-  print_string (e.starts |> time_to_string);
   if (mem e.name e.starts c.events) then raise CannotAddExisting
   else 
     { calname = c.calname; events = (e :: c.events)}

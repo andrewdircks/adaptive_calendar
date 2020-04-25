@@ -11,6 +11,9 @@ let print_try_again x =
 let print_InvalidDate x = 
   ANSITerminal.(print_string [red] "The date you entered does not exist. \n")
 
+let print_MetaCommandDNE x = 
+  ANSITerminal.(print_string [red] "Enter 'create' or 'access'.\n")
+
 let print_CommandDNE x = 
   ANSITerminal.(print_string [red] "That command does not exist.\n")
 
@@ -85,6 +88,14 @@ let field_edit_instructions field =
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
+let rec create_instructions x : string =
+  ANSITerminal.(print_string [red] ("What is the name of your new calendar? Make sure you do not choose a name of an existing calendar.\n"));
+  Stdlib.print_string "Type here: > ";
+  try
+    Stdlib.read_line () |> Command.create_parse
+  with 
+  | EmptyCalendarName -> print_try_again; create_instructions 1
+
 let rec add_instructions x : Calendar.event = 
   let name = event_name_instructions 1 in 
   let starttime = start_time_instructions 1 in 
@@ -130,9 +141,11 @@ let rec change (success : bool) (c : Calendar.t) : unit =
   if success then print_success 1;
   try
     match main_instructions 1 with  
+    | Create -> let n = create_instructions 1 in change true (Calendar.empty n)
     | Add -> add_instructions 1 |> Calendar.add_event c |> change true
     | Delete -> delete_instructions 1 |> Calendar.delete_event c |> change true
     | Edit -> edit_instructions  1|> Calendar.edit_event c |> change true
+    | Save -> Command.save_parse c; print_success 1; exit 0
     | _ -> change false c
   with 
   | CannotAddExisting -> print_CannotAddExisting 1; print_try_again 1; change false c
@@ -142,15 +155,42 @@ let start_cal file =
   let c = file |> Yojson.Basic.from_file |> Calendar.from_json in 
   change false c
 
-(** [main ()] prompts for the game to play, then starts it. *)
-let main () =
-  ANSITerminal.(print_string [red]
-                  "\n\nWelcome to the Adaptive Calender system.\n");
+let read_file x = 
   print_endline "Enter the calendar you would like to edit:\n";
   Stdlib.print_string  "> ";
   match read_line () with
   | exception End_of_file -> ()
-  | file_name -> start_cal file_name
+  | cal_name -> start_cal (cal_name ^ ".json")
+
+let rec meta_instructions x = 
+  ANSITerminal.(print_string [red] "Would you like to create a new calendar or access an existing one?\n");
+  ANSITerminal.(print_string [red] "Enter 'create' or 'access'\n");
+  Stdlib.print_string "Type here: > ";
+  try 
+    let meta = (Stdlib.read_line ()|> meta_parse) in 
+    if meta = "access" then read_file 1;
+    if meta = "create" then let n = create_instructions 1 in 
+      change true (Calendar.empty n)
+  with 
+  | MetaCommandDNE -> print_MetaCommandDNE 1;
+    meta_instructions x
+
+(** [main ()] prompts for the game to play, then starts it. *)
+(* let main () =
+   ANSITerminal.(print_string [red]
+                  "\n\nWelcome to the Adaptive Calender system.\n");
+   print_endline "Enter the calendar you would like to edit:\n";
+   Stdlib.print_string  "> ";
+
+   match read_line () with
+   | exception End_of_file -> ()
+   | file_name -> start_cal file_name *)
+
+let main () =
+  ANSITerminal.(print_string [red]
+                  "\n\nWelcome to the Adaptive Calender system!\n");
+  meta_instructions 1
 
 (* Execute the game engine. *)
+
 let () = main ()

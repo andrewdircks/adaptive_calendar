@@ -2,6 +2,9 @@
    Parsing of user commands.
 *)
 
+(** Raised if an invalid meta command is entered. *)
+exception MetaCommandDNE
+
 (** Raised if an invalid command is entered. *)
 exception CommandDNE
 
@@ -23,8 +26,15 @@ exception InvalidDateString
 (** Raised if an invalid field to be edited is inputted. *)
 exception InvalidField
 
+(** Raised if an empty calendar name is entered. *)
+exception EmptyCalendarName
+
+(** The type representing meta user commands to start the application. *)
+type meta_command = Create | Access
+
 (** The type representing main user commands. *)
 type command = 
+  | Create
   | Add 
   | Delete 
   | Edit 
@@ -37,6 +47,12 @@ type command =
     of valid commands (i.e. words in type [command]) are valid.
     Raises: [CommandDNE] if an invalid command is entered. *)
 val main_parse : string -> command
+
+(** [meta_parse str] handles a player's initial to command, to either create a 
+    new calendar or edit an existing one. 
+    Raises: [MetaCommandDNE] if an invalid command is entered. *)
+val meta_parse : string -> string
+
 
 (** [add_parse str] parses a player's input into an event to be added to the 
     current calendar. 
@@ -72,4 +88,10 @@ val delete_parse : string list -> (string * Time.t)
             [InvalidDateString] if the inputted date string is not in correct form.*)
 val edit_parse : string list -> (string * Time.t * string * string)
 
+(** [save_parse] writes the current calendar as a json file and returns unit. *)
+val save_parse : Calendar.t -> unit
+
+(** [create_parse name] creates a new calendar with name [name]a s a json file 
+    [name].json and returns [name]. *)
+val create_parse : string -> string
 

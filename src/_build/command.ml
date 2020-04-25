@@ -1,6 +1,8 @@
 open Calendar
 open Time
 
+exception MetaCommandDNE
+
 exception CommandDNE
 
 exception InvalidDate
@@ -15,7 +17,12 @@ exception StartAfterEnd
 
 exception InvalidField
 
+exception EmptyCalendarName
+
+type meta_command = Create | Access
+
 type command = 
+  | Create
   | Add 
   | Delete 
   | Edit 
@@ -23,6 +30,16 @@ type command =
   | Previous
   | Next
   | Save
+
+let meta_parse str = 
+  let n = String.length str in
+  let lc_str = String.lowercase_ascii str in
+  if n = 6 then 
+    if lc_str = "create" then "create"
+    else if lc_str = "access" then "access"
+    else raise MetaCommandDNE
+  else raise MetaCommandDNE
+
 
 let main_parse str = 
   let n = String.length str in
@@ -158,3 +175,8 @@ let edit_parse input =
     | InvalidDateString -> raise InvalidDateString
     | InvalidField -> raise InvalidField
 
+let save_parse c = Calendar.to_json c
+
+let create_parse name = 
+  if name = "" then raise EmptyCalendarName
+  else (Calendar.to_json (Calendar.empty name)); name
