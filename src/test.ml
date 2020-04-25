@@ -4,18 +4,22 @@ open Command
 open State
 
 
+(** Possible Sample Test to Experiment With 
+let cal_test = parse_file "test_calendar.json"*)
 
-let cal_test = parse_file "test_calendar.json"
-
+(** [calname_test name caldesc cal] constructs an OUnit
+    test named [name] that asserts the equality of [cal.calname]
+    with [calname]. *)
 let calname_test 
-    (name : string) (caldesc: string) (cal:Calendar.t): test =
+    (name : string) (calname: string) (cal:Calendar.t): test =
     name >:: (fun _ ->
-    (assert_equal cal_test.calname caldesc)
+    (assert_equal cal.calname calname)
     )
 
+(** [calender_tests] is all the tests to be completed on the calendar record*)
 let calender_tests = 
   [
-    calname_test "test_calendar.json name" "Andrew and Sam - CS3110 MS1" cal_test;
+    (**calname_test "test_calendar.json name" "test" cal_test;*)
   ]
 
 let suite =

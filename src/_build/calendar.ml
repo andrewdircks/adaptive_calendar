@@ -9,6 +9,7 @@ type event =  {
 }
 
 (**
+  Draft Code (Kept for future purposes)
    module Event_Time_Pairs = 
    struct
    type t = (string * Time.t)
@@ -17,6 +18,7 @@ type event =  {
 
    module EventMap = Map.Make(Event_Time_Pairs)
 *)
+
 (* RI : no two events have the same start time and end date. *)
 type t = {
   calname: string;
@@ -30,8 +32,8 @@ exception CannotAddExisting
 exception MalformedTuple
 
 let empty name = {
-  calname= name;
-  events= []
+  calname = name;
+  events = []
 }
 
 (** [event_of_json ejson] is the event that [ejson] represents. 
@@ -44,7 +46,7 @@ let event_of_json (ejson : Yojson.Basic.t) : event =
     description = ejson |> member "description" |> to_string ;
   }
 
-let from_json json = 
+let from_json (json : Yojson.Basic.t) : t = 
   {
     events = json |> member "events" |> to_list |> List.map event_of_json;
     calname = json |> member "calname" |> to_string;
@@ -53,7 +55,10 @@ let from_json json =
 let parse_file (fname:string) : t = 
   Yojson.Basic.from_file fname |> from_json
 
-let rec events_to_string (evtlist: event list) = 
+(** [events_to_string evtlist] is the events
+  of [evtlist] formatted into a json string.
+  Requires: [evtlist] is valid event list. *)
+let rec events_to_string (evtlist: event list) : string = 
   if (List.length evtlist = 0) then "" else
     let curevt = List.hd evtlist in 
     "    {\n      \"starts\": \"" ^ 
@@ -69,7 +74,9 @@ let rec events_to_string (evtlist: event list) =
      | h::[] -> "\n"
      | h::g -> ",\n" ^ events_to_string g)
 
-
+(** [to_json_string cal] is the the calendar [cal]
+  formatted as a json string.
+  Requires: [cal] is a valid calendar. *)
 let to_json_string (cal: t) : string = 
   "{\n  \"events\": [\n" ^ 
   events_to_string cal.events ^ 
@@ -82,11 +89,9 @@ let to_json c =
   Printf.fprintf newfile "%s" (to_json_string c);
   close_out newfile
 
-(*  let get_events = failwith "unimplemented"
-
-    let todays_events = failwith "unimplemented"*)
-
-(* (** [find_event name time c] is the event in [c] with name [name] and start time
+(* 
+  Possible Future Code:
+  (** [find_event name time c] is the event in [c] with name [name] and start time
     [time].
     Raises: [EventDNE] if no such event exists. *)
    let rec find_event (name : string) (time : Time.t) =   *)
@@ -127,46 +132,56 @@ let delete_event c info =
   )
   with EventDNE -> raise EventDNE
 
-let change_name n c = 
+let change_name n e = 
   {
-    starts = c.starts;
-    ends = c.ends;
+    starts = e.starts;
+    ends = e.ends;
     name = n;
-    description = c.description;
+    description = e.description;
   }
 
-let change_description d c = 
+let change_description d e = 
   {
-    starts = c.starts;
-    ends = c.ends;
-    name = c.name;
+    starts = e.starts;
+    ends = e.ends;
+    name = e.name;
     description = d;
   }
 
-let change_start_time st c = 
+let change_start_time st e = 
   {
     starts = st |> Time.toGMT;
-    ends = c.ends;
-    name = c.name;
-    description = c.description;
+    ends = e.ends;
+    name = e.name;
+    description = e.description;
   }
 
-let change_end_time et c = 
+let change_end_time et e = 
   {
-    starts = c.starts;
+    starts = e.starts;
     ends = et |> Time.toGMT;
-    name = c.name;
-    description = c.description;
+    name = e.name;
+    description = e.description;
   }
 
+
+(**[firsttwo_from_tuple x] is the a tuple
+  containing the first two elements in [x]
+  Requires: [x] is tuple of length 4*)
 let firsttwo_from_tuple x = 
   match x with 
   | (name, start, _, _) -> (name, start)
 
+(**[third_from_tuple x] is the a tuple
+  containing the third element in [x]
+  Requires: [x] is tuple of length 4*)
 let third_from_tuple x = 
   match x with 
   | (_, _, third, _) -> third
 
+(**[fourth_from_tuple x] is the a tuple
+  containing the fourth element in [x]
+  Requires: [x] is tuple of length 4*)
 let fourth_from_tuple x = 
   match x with 
   | (_, _, _, fourth) -> fourth

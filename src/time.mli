@@ -11,7 +11,6 @@ type month = Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | D
 (** Type representing days of the month. *)
 type day_m = int
 
-
 (** Type representing time of day. Valid range for hour: 0..23 *)
 type time_d = {
   hour : int;
@@ -39,7 +38,7 @@ val difference : int
     Requires: [d] represents a time in standard GMT time. *)
 val toLocal : t -> t
 
-(** [toLocal d] is [d] represented in GMT.
+(** [toGMT d] is [d] represented in GMT.
     Requires: [d] represents a time in the users time zone. *)
 val toGMT : t -> t
 
@@ -58,8 +57,7 @@ val now : t
     the minute number.*)
 val from_json_string : string -> t
 
-(** [from_json_string str] is the date and time value of [str], as stored in json 
-    files. 
+(** [from_input_string str] is the date and time value of a [str] collected from user.
     Requires: [str] is in the format "mm/dd/yyyy/hh:zz/xx": 
     where mm represents the month number, dd represents the day number,
     yyyy represents the year number, hh represents the hour number, zz represents
@@ -67,11 +65,11 @@ val from_json_string : string -> t
 val from_input_string : string -> t
 
 (**
-    [to_string tm] is the time value as a string
+    [time_to_string tm] is the time value as a 24-hr string.
 *)
 val time_to_string : t -> string
 
-(** [occurs_before d1 d2] is true if [d1] is earlier thatn [d2] and 
+(** [occurs_before d1 d2] is true if [d1] is earlier than [d2] and 
     false otherwise. *)
 val occurs_before : t -> t -> bool
 

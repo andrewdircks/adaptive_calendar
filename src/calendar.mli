@@ -40,16 +40,10 @@ val empty : string -> t
     Requires: [j] is a valid JSON calendar representation. *)
 val from_json : Yojson.Basic.t -> t
 
-(**  [to_json c] is the JSON file that [c] represents. *)
+(** [to_json c] is the JSON file that calendar [c] represents. *)
 val to_json :  t -> unit
 
-(** [get_events c] is the list of events in calendar [c]. 
-    val get_events : t -> event list*)
-
-(** [todays_events d c] is the list of events in calendar [c] on date [d]. 
-    val todays_events : t -> event list*)
-
-(**[add_event e c] is [c] with event [e] added. 
+(**[add_event e c] is calendar [c] with event [e] added. 
     Raises: [CannotAddExisting] if a similar event exists. *)
 val add_event : t -> event -> t
 
@@ -64,18 +58,21 @@ val delete_event : t -> (string * Time.t) -> t
     Raises: [EventDNE] if there is no such event.*)
 val edit_event : t -> (string * Time.t * string * string) -> t
 
-(** [change_name n c] is [c] with name changed to [n]. 
+(** [change_name n e] is event [e] with name changed to [e]. 
     Requires: [n] is a non-empty string. *)
 val change_name : string -> event -> event
 
-(** [change_name d c] is [c] with description changed to [d]. *)
+(** [change_description d e] is event [e] with description changed to [d]. *)
 val change_description : string -> event -> event
 
-(** [change_start_time st c] is [c] with start time changed to [st]. *)
+(** [change_start_time st e] is [e] with start time changed to [st]. *)
 val change_start_time : Time.t -> event -> event
 
-(** [change_end_time et c] is [c] with end time changed to [ed]. *)
+(** [change_end_time et e] is event [e] with end time changed to [et]. *)
 val change_end_time : Time.t -> event -> event
 
+(** [parse_file fname] is the calendar [c] stored in the json file [fname]
+    Requires: [fname] is a valid json file corresponding to a calendar.
+    *)
 val parse_file : string -> t
 

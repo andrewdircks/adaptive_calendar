@@ -71,12 +71,12 @@ let is_valid_date_string str =
     then false
     (* check for integers in data/time spots *)
     else try
-        int_of_string (String.sub str 0 2);
-        int_of_string (String.sub str 3 2);
-        int_of_string (String.sub str 6 4);
-        int_of_string (String.sub str 11 2);
-        int_of_string (String.sub str 14 2);
-        true
+        let areints = int_of_string (String.sub str 0 2) +
+        int_of_string (String.sub str 3 2) +
+        int_of_string (String.sub str 6 4) +
+        int_of_string (String.sub str 11 2) +
+        int_of_string (String.sub str 14 2) in
+        if areints > 0 then true else false
       with Failure _ -> false
 
 (** [handle_date_input s1 s2] is the tuple (d1,d2) where d1 and d2 are the 
@@ -87,7 +87,7 @@ let is_valid_date_string str =
 let handle_date_input s1 s2 = 
   (* determine if s1 and s2 are valid date strings *)
   if not (is_valid_date_string s1) then raise InvalidDateString
-  else if not (is_valid_date_string s1) then raise InvalidDateString 
+  else if not (is_valid_date_string s2) then raise InvalidDateString 
   else 
     let asdf = Time.from_input_string s1 in 
     let d2 = Time.from_input_string s2 in

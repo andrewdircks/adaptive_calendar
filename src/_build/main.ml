@@ -2,25 +2,33 @@ open ANSITerminal
 open Command 
 open Calendar 
 
-let print_success x = 
+(** [print_success ()] notifies user of a succesful operation *)
+let print_success () = 
   ANSITerminal.(print_string [red] "Success! \n")
 
-let print_try_again x = 
+(** [print_try_again ()] displays a try again message, to handle
+    unexpected user inputs. *)
+let print_try_again () = 
   ANSITerminal.(print_string [red] "Try again. \n")
 
-let print_InvalidDate x = 
+(** [print_InvalidDate ()] displays invalid date error message. *)
+let print_InvalidDate () = 
   ANSITerminal.(print_string [red] "The date you entered does not exist. \n")
 
-let print_MetaCommandDNE x = 
+(** [print_MetaCommandDNE ()] displays meta command does not exist error message. *)
+let print_MetaCommandDNE () = 
   ANSITerminal.(print_string [red] "Enter 'create' or 'access'.\n")
 
-let print_CommandDNE x = 
+(** [print_CommandDNE ()] displays command does not exist error message. *)
+let print_CommandDNE () = 
   ANSITerminal.(print_string [red] "That command does not exist.\n")
 
-let print_EventDNE x = 
+(** [print_EventDNE ()] displays event does not exist error message. *)
+let print_EventDNE () = 
   ANSITerminal.(print_string [red] "That event doesnt exist. Make sure you have the correct event name and start time.\n")
 
-let print_InvalidDateString x : unit = 
+(** [print_InvalidDateString ()] displays invalid date message. *)
+let print_InvalidDateString () : unit = 
   ANSITerminal.(print_string [red] ("The date you entered is not in the correct form. 
    Make sure you enter a date in the form 'mm/dd/yyyy/hh:ii/xx where:' \n" 
                                     ^  "mm is the month in range [01..12]\n"
@@ -30,167 +38,188 @@ let print_InvalidDateString x : unit =
                                     ^  "ii is the minute in range [00..59]\n"
                                     ^  "xx is 'am' or 'pm'\n"))
 
-let print_MalformedList x = 
+(** [print_MalformedList ()] displays malformed list message *)
+let print_MalformedList () = 
   ANSITerminal.(print_string [red] "This shouldnt happen.\n")
 
-let print_CannotAddExisting x = 
+(** [print_CannotAddExisting ()] displays error when user inputs empty string *)
+let print_CannotAddExisting () = 
   ANSITerminal.(print_string [red] "You cannot add an event with the same name and start date as another event. Try again. \n")
 
-let print_EmptyEventName x = 
+(** [print_EmptyEventName ()] displays error when user inputs empty string *)
+let print_EmptyEventName () = 
   ANSITerminal.(print_string [red] "Enter a non empty name for this event.\n")
 
-let print_StartAfterEnd x = 
+(** [print_StartAfterEnd ()] displays error when start time occurs after end *)
+let print_StartAfterEnd () = 
   ANSITerminal.(print_string [red] "Make sure the starting time is before the end time!\n")
 
-let print_InvalidField x = 
+(** [print_InvalidField ()] displays error for an invalid field. *)
+let print_InvalidField () = 
   ANSITerminal.(print_string [red] "Make sure you are changing the correct field. \n")
 
-let rec main_instructions x = 
+(** [main_instructions ()] is the main recursive function once a calendar is selected.
+    It enables the user to run functions that interact with the calendar.*)
+let rec main_instructions () = 
   ANSITerminal.(print_string [red] "What would you like to do?\n");
+  ANSITerminal.(print_string [blue] "Add: Make new event\n");
+  ANSITerminal.(print_string [blue] "Edit: Modify existing event\n");
+  ANSITerminal.(print_string [blue] "Delete: Delete existing event\n");
+  ANSITerminal.(print_string [blue] "Save: Close and Save to file\n");
+
   Stdlib.print_string "Type here: > ";
   try (Stdlib.read_line ()|> main_parse) 
   with 
-  | CommandDNE -> print_CommandDNE 1;
-    main_instructions x
+  | CommandDNE -> print_CommandDNE ();
+    main_instructions ()
 
-let event_name_instructions x = 
+(** [event_name_instructions ()] prompts user for name of event. *)
+let event_name_instructions () = 
   ANSITerminal.(print_string [red] "What is the name of this event?\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
+(** [event_delete_edit_name_instructions action] prompts user for event name to perform
+    [action] on. *)
 let event_delete_edit_name_instructions action = 
   ANSITerminal.(print_string [red] ("What is the name of the event to " ^ action ^ "?\n"));
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-let start_time_instructions x = 
+(** [start_time_instructions ()] prompts user for start time value. *)
+let start_time_instructions () = 
   ANSITerminal.(print_string [red] "When does this event start?\n");
+  ANSITerminal.(print_string [blue] "Format: mm/dd/yyyy/hh:mm/am-pm\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-let end_time_instructions x = 
+(** [end_time_instructions ()] prompts user for end time value. *)
+let end_time_instructions () = 
   ANSITerminal.(print_string [red] "When does this event end?\n");
+  ANSITerminal.(print_string [blue] "Format: mm/dd/yyyy/hh:mm/am-pm\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-let description_instructions x = 
+(** [description_instructions ()] prompts user for event's description. *)
+let description_instructions () = 
   ANSITerminal.(print_string [red] "What's this event's description?\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-let field_instructions x = 
+(** [field_instructions ()] prompts user for field to change. *)
+let field_instructions () = 
   ANSITerminal.(print_string [red] "What do you want to edit - name, start, end, or description?\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
+(** [field_edit_instructions field] prompts user for changed value of [field]*)
 let field_edit_instructions field = 
   ANSITerminal.(print_string [red] ("What would you like to change the " ^ field ^ " to?\n"));
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-let rec create_instructions x : string =
+(** [create_instructions ()] runs instructions for creating calendar*)
+let rec create_instructions () : string =
   ANSITerminal.(print_string [red] ("What is the name of your new calendar? Make sure you do not choose a name of an existing calendar.\n"));
   Stdlib.print_string "Type here: > ";
   try
     Stdlib.read_line () |> Command.create_parse
   with 
-  | EmptyCalendarName -> print_try_again; create_instructions 1
+  | EmptyCalendarName -> print_try_again (); (create_instructions ())
 
-let rec add_instructions x : Calendar.event = 
-  let name = event_name_instructions 1 in 
-  let starttime = start_time_instructions 1 in 
-  let endtime = end_time_instructions 1 in 
-  let description = description_instructions 1 in
+(** [add_instructions ()] runs instructions for adding events*)
+let rec add_instructions () : Calendar.event = 
+  let name = event_name_instructions () in 
+  let starttime = start_time_instructions () in 
+  let endtime = end_time_instructions () in 
+  let description = description_instructions () in
   try 
     (add_parse [name; starttime; endtime; description])
   with 
-  | InvalidDate -> print_InvalidDate 1; add_instructions 1
-  | MalformedList -> print_MalformedList 1; add_instructions 1
-  | EmptyEventName -> print_EmptyEventName 1; add_instructions 1
-  | StartAfterEnd -> print_StartAfterEnd 1; add_instructions 1
-  | InvalidDateString -> print_InvalidDateString 1; add_instructions 1
+  | InvalidDate -> print_InvalidDate (); add_instructions ()
+  | MalformedList -> print_MalformedList (); add_instructions ()
+  | EmptyEventName -> print_EmptyEventName (); add_instructions ()
+  | StartAfterEnd -> print_StartAfterEnd (); add_instructions ()
+  | InvalidDateString -> print_InvalidDateString (); add_instructions ()
 
-let rec delete_instructions x = 
+(** [delete_instructions ()] runs instructions for deleting events*)
+let rec delete_instructions () = 
   let name = event_delete_edit_name_instructions "delete" in 
-  let starttime = start_time_instructions 1 in 
+  let starttime = start_time_instructions () in 
   try delete_parse [name; starttime] 
   with 
-  | InvalidDate -> print_InvalidDate 1; delete_instructions 1 
-  | MalformedList -> print_MalformedList 1; delete_instructions 1
-  | EmptyEventName -> print_EmptyEventName 1; delete_instructions 1
-  | StartAfterEnd -> print_StartAfterEnd 1; delete_instructions 1
-  | InvalidDateString -> print_InvalidDateString 1; delete_instructions 1
-  | EventDNE -> print_EventDNE 1; delete_instructions 1
+  | InvalidDate -> print_InvalidDate (); delete_instructions ()
+  | MalformedList -> print_MalformedList (); delete_instructions ()
+  | EmptyEventName -> print_EmptyEventName (); delete_instructions ()
+  | StartAfterEnd -> print_StartAfterEnd (); delete_instructions ()
+  | InvalidDateString -> print_InvalidDateString (); delete_instructions ()
+  | EventDNE -> print_EventDNE (); delete_instructions ()
 
-let rec edit_instructions x = 
+(** [edit_instructions ()] runs instructions for editing events*)
+let rec edit_instructions () = 
   let name = event_delete_edit_name_instructions "edit" in 
-  let starttime = start_time_instructions 1 in 
-  let field = field_instructions 1 in 
-  let change = field_edit_instructions field in 
-  try edit_parse [name; starttime; field; change] 
+  let starttime = start_time_instructions () in 
+  let field = field_instructions () in 
+  let thechange = field_edit_instructions field in 
+  try edit_parse [name; starttime; field; thechange] 
   with 
-  | InvalidDate -> print_InvalidDate 1; print_try_again 1; edit_instructions 1
-  | MalformedList -> print_MalformedList 1; print_try_again 1; edit_instructions 1
-  | EmptyEventName -> print_EmptyEventName 1; print_try_again 1; edit_instructions 1
-  | StartAfterEnd -> print_StartAfterEnd 1; print_try_again 1; edit_instructions 1
-  | InvalidDateString -> print_InvalidDateString 1; print_try_again 1; edit_instructions 1
-  | EventDNE -> print_EventDNE 1; print_try_again 1; edit_instructions 1
+  | InvalidDate -> print_InvalidDate (); print_try_again (); edit_instructions ()
+  | MalformedList -> print_MalformedList (); print_try_again (); edit_instructions ()
+  | EmptyEventName -> print_EmptyEventName (); print_try_again (); edit_instructions ()
+  | StartAfterEnd -> print_StartAfterEnd (); print_try_again (); edit_instructions ()
+  | InvalidDateString -> print_InvalidDateString (); print_try_again (); edit_instructions ()
+  | EventDNE -> print_EventDNE (); print_try_again (); edit_instructions ()
 
-(** [play c] is the primary recursive function for playing this application.*) 
+(** [change success c] is the primary recursive function for playing this application.*) 
 let rec change (success : bool) (c : Calendar.t) : unit = 
-  if success then print_success 1;
+  if success then print_success ();
   try
-    match main_instructions 1 with  
-    | Create -> let n = create_instructions 1 in change true (Calendar.empty n)
-    | Add -> add_instructions 1 |> Calendar.add_event c |> change true
-    | Delete -> delete_instructions 1 |> Calendar.delete_event c |> change true
-    | Edit -> edit_instructions  1|> Calendar.edit_event c |> change true
-    | Save -> Command.save_parse c; print_success 1; exit 0
+    match main_instructions () with  
+    | Create -> let n = create_instructions () in change true (Calendar.empty n)
+    | Add -> add_instructions () |> Calendar.add_event c |> change true
+    | Delete -> delete_instructions () |> Calendar.delete_event c |> change true
+    | Edit -> edit_instructions () |> Calendar.edit_event c |> change true
+    | Save -> Command.save_parse c; print_success (); exit 0
     | _ -> change false c
   with 
-  | CannotAddExisting -> print_CannotAddExisting 1; print_try_again 1; change false c
-  | EventDNE -> print_EventDNE 1; print_try_again 1; change false c
+  | CannotAddExisting -> print_CannotAddExisting (); print_try_again (); change false c
+  | EventDNE -> print_EventDNE (); print_try_again (); change false c
 
+(** [start_cal file] loads json calendar at [file] and launches program with
+    the calendar type representation. *)
 let start_cal file = 
   let c = file |> Yojson.Basic.from_file |> Calendar.from_json in 
   change false c
 
-let read_file x = 
+(** [read_file ()] gets calendar name from user ands load calendars into program*)
+let read_file () = 
   print_endline "Enter the calendar you would like to edit:\n";
   Stdlib.print_string  "> ";
   match read_line () with
   | exception End_of_file -> ()
   | cal_name -> start_cal (cal_name ^ ".json")
 
-let rec meta_instructions x = 
+(** [meta_instructions ()] lists the highest level instructions *)
+let rec meta_instructions () = 
   ANSITerminal.(print_string [red] "Would you like to create a new calendar or access an existing one?\n");
-  ANSITerminal.(print_string [red] "Enter 'create' or 'access'\n");
+  ANSITerminal.(print_string [blue] "Enter 'create' or 'access'\n");
   Stdlib.print_string "Type here: > ";
   try 
     let meta = (Stdlib.read_line ()|> meta_parse) in 
-    if meta = "access" then read_file 1;
-    if meta = "create" then let n = create_instructions 1 in 
+    if meta = "access" then read_file ();
+    if meta = "create" then let n = create_instructions () in 
       change true (Calendar.empty n)
   with 
-  | MetaCommandDNE -> print_MetaCommandDNE 1;
-    meta_instructions x
+  | MetaCommandDNE -> print_MetaCommandDNE ();
+    meta_instructions ()
 
-(** [main ()] prompts for the game to play, then starts it. *)
-(* let main () =
-   ANSITerminal.(print_string [red]
-                  "\n\nWelcome to the Adaptive Calender system.\n");
-   print_endline "Enter the calendar you would like to edit:\n";
-   Stdlib.print_string  "> ";
-
-   match read_line () with
-   | exception End_of_file -> ()
-   | file_name -> start_cal file_name *)
+(** [main ()] starts the calendar interface *)
 
 let main () =
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to the Adaptive Calender system!\n");
-  meta_instructions 1
+  meta_instructions ()
 
-(* Execute the game engine. *)
+(* Execute the calendar engine. *)
 
 let () = main ()

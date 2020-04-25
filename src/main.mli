@@ -1,5 +1,5 @@
 (** 
-   The main entry point for the game interface.
+   The main entry point for the calendar interface.
 *)
 
 (* You are free to add more code here. *)

@@ -9,16 +9,13 @@ type month = Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | D
 (** Type representing days of the month. Valid range: 1..31*)
 type day_m = int
 
-(** Type representing time of minutes. We only represent times in 15 minute 
-    intervals. 
-    type time_m = T0 | T15 | T30 | T45*)
-
 (** Type representing time of day. Valid range for hour: 0..23 *)
 type time_d = {
   hour : int;
   minute : int;
 }
 
+(** Abstract type representing date and time. *)
 type t = {
   year : year;
   month : month;
@@ -236,14 +233,6 @@ let month_from_int (m : int) : month =
   else if m = 11 then Nov 
   else Dec
 
-(** [min_to_quarters m] the [time_m] analog of [m], with rounding down.
-    Requires: [m] is between 0 and 60. *)
-
-(* let min_to_quarters (m : int) : time_m = 
-   if m < 15 then 0 
-   else if m < 30 then 15 
-   else if m < 45 then 30 
-   else 45 *)
 
 let now =
   let tm = Unix.localtime (Unix.time()) in 
@@ -256,7 +245,6 @@ let now =
     } } 
 
 
-(* from_string already military time "mm/dd/yyyy/hh:zz" *)
 let from_json_string (str:string) = 
   if String.length str <> 16 then failwith ("invalid string length: " ^ str) else 
     {
@@ -269,14 +257,19 @@ let from_json_string (str:string) =
       }
     }
 
+(** [to_military ampm hour] is the hr [hour]
+    of string type [ampm] into 24-hr military time.*)
 let to_military ampm hour = 
   let ap = String.lowercase_ascii ampm in
-  if ap = "am" then hour
-  else if ap = "pm" then hour + 12
+  if ap = "am" then 
+  if hour = 12 then 0
+  else hour
+  else if ap = "pm" then 
+  if hour != 12 then hour + 12
+  else 12
   else failwith ("not am or pm")
 
 
-(* "mm/dd/yyyy/hh:zz/am" *)
 let from_input_string (str:string) = 
   if String.length str <> 19 then failwith ("invalid string length: " ^ str) else 
     {
@@ -305,11 +298,13 @@ let month_to_int m =
   | Nov -> 11
   | Dec -> 12
 
-
+(** [addzeros count term] is a string 
+  concatenating "0" with [term] 
+  while length of [term] < [count]
+*)
 let rec addzeros count term = 
   if String.length term < count then addzeros count ("0" ^ term) 
   else term
-
 
 let time_to_string (tm:t):string =
   match tm with
@@ -320,8 +315,6 @@ let time_to_string (tm:t):string =
     (string_of_int hr |> addzeros 2) ^  ":" ^
     (string_of_int min |> addzeros 2)
 
-let min_to_int m = 
-  m
 
 let occurs_before t1 t2 =
   (* handle years first *)              
@@ -342,7 +335,7 @@ let occurs_before t1 t2 =
         else if hour < 0 then true
         (* same year and month and day and hour, handle minute *)  
         else let min = compare 
-                 (min_to_int t1.time_d.minute) (min_to_int t2.time_d.minute) in
+                 ( t1.time_d.minute) ( t2.time_d.minute) in
           if min > 0 then false 
           else if min < 0 then true
           (* same exact time*)  
