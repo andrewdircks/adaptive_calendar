@@ -1,6 +1,12 @@
 {
   "events": [
     {
+      "starts": "05/20/2021/21:30",
+      "ends": "05/20/2021/21:31",
+      "name": "idkman",
+      "description": "heres a test!"
+    },
+    {
       "starts": "12/12/2020/00:22",
       "ends": "12/12/2020/12:50",
       "name": "tevent",
