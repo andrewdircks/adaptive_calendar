@@ -30,6 +30,9 @@ exception InvalidField
 exception EmptyCalendarName
 
 (** The type representing meta user commands to start the application. *)
+type view_option = Single of Calendar.event | Week of Time.t
+
+(** The type representing meta user commands to start the application. *)
 type meta_command = Create | Access
 
 (** The type representing main user commands. *)
@@ -94,4 +97,8 @@ val save_parse : Calendar.t -> unit
 (** [create_parse name] creates a new calendar with name [name]a s a json file 
     [name].json and returns [name]. *)
 val create_parse : string -> string
+
+(** [view_parse name] returns a view option with the corresponding start date or 
+    event. *)
+val view_parse : Calendar.t -> string -> view_option
 

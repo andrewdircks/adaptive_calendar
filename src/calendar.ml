@@ -9,7 +9,7 @@ type event =  {
 }
 
 (**
-  Draft Code (Kept for future purposes)
+   Draft Code (Kept for future purposes)
    module Event_Time_Pairs = 
    struct
    type t = (string * Time.t)
@@ -56,8 +56,8 @@ let parse_file (fname:string) : t =
   Yojson.Basic.from_file fname |> from_json
 
 (** [events_to_string evtlist] is the events
-  of [evtlist] formatted into a json string.
-  Requires: [evtlist] is valid event list. *)
+    of [evtlist] formatted into a json string.
+    Requires: [evtlist] is valid event list. *)
 let rec events_to_string (evtlist: event list) : string = 
   if (List.length evtlist = 0) then "" else
     let curevt = List.hd evtlist in 
@@ -75,8 +75,8 @@ let rec events_to_string (evtlist: event list) : string =
      | h::g -> ",\n" ^ events_to_string g)
 
 (** [to_json_string cal] is the the calendar [cal]
-  formatted as a json string.
-  Requires: [cal] is a valid calendar. *)
+    formatted as a json string.
+    Requires: [cal] is a valid calendar. *)
 let to_json_string (cal: t) : string = 
   "{\n  \"events\": [\n" ^ 
   events_to_string cal.events ^ 
@@ -104,6 +104,12 @@ let rec mem (name : string) (start : Time.t) (events : event list) : bool =
   | h::t -> 
     if (h.name = name && h.starts = start) then true 
     else mem name start t
+
+(** [has_name n e] is true of event [e] has name [n] and false otherwise. *)
+let has_name (n : string) (e : event) : bool = e.name = n
+
+let find_event c name = 
+  List.find_opt (has_name name) c.events
 
 let add_event c e = 
   if (mem e.name e.starts c.events) then raise CannotAddExisting
@@ -166,22 +172,22 @@ let change_end_time et e =
 
 
 (**[firsttwo_from_tuple x] is the a tuple
-  containing the first two elements in [x]
-  Requires: [x] is tuple of length 4*)
+   containing the first two elements in [x]
+   Requires: [x] is tuple of length 4*)
 let firsttwo_from_tuple x = 
   match x with 
   | (name, start, _, _) -> (name, start)
 
 (**[third_from_tuple x] is the a tuple
-  containing the third element in [x]
-  Requires: [x] is tuple of length 4*)
+   containing the third element in [x]
+   Requires: [x] is tuple of length 4*)
 let third_from_tuple x = 
   match x with 
   | (_, _, third, _) -> third
 
 (**[fourth_from_tuple x] is the a tuple
-  containing the fourth element in [x]
-  Requires: [x] is tuple of length 4*)
+   containing the fourth element in [x]
+   Requires: [x] is tuple of length 4*)
 let fourth_from_tuple x = 
   match x with 
   | (_, _, _, fourth) -> fourth

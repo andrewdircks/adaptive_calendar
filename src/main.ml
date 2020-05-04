@@ -79,6 +79,12 @@ let event_name_instructions () =
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
+(** [view_instructions ()] prompts user to enter an event name or week to view. *)
+let event_or_week_instructions () = 
+  ANSITerminal.(print_string [red] "Enter an event name or week to view (in format mm/dd) \n");
+  Stdlib.print_string "Type here: > ";
+  Stdlib.read_line ()
+
 (** [event_delete_edit_name_instructions action] prompts user for event name to perform
     [action] on. *)
 let event_delete_edit_name_instructions action = 
@@ -170,6 +176,16 @@ let rec edit_instructions () =
   | InvalidDateString -> print_InvalidDateString (); print_try_again (); edit_instructions ()
   | EventDNE -> print_EventDNE (); print_try_again (); edit_instructions ()
 
+(** [view_instructions c] runs instructions for viewing events of [c]*)
+let rec view_instructions c : unit = 
+  let command = event_or_week_instructions () in 
+  try 
+    match view_parse c command with 
+    | Single e -> Graphic.view_event e
+    | Week _ -> failwith "havent implemented week view"
+  with
+  | _ -> print_try_again (); view_instructions c
+
 (** [change success c] is the primary recursive function for playing this application.*) 
 let rec change (success : bool) (c : Calendar.t) : unit = 
   if success then print_success ();
@@ -180,6 +196,7 @@ let rec change (success : bool) (c : Calendar.t) : unit =
     | Delete -> delete_instructions () |> Calendar.delete_event c |> change true
     | Edit -> edit_instructions () |> Calendar.edit_event c |> change true
     | Save -> Command.save_parse c; print_success (); exit 0
+    | View -> view_instructions c
     | _ -> change false c
   with 
   | CannotAddExisting -> print_CannotAddExisting (); print_try_again (); change false c

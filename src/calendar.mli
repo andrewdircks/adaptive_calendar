@@ -43,6 +43,10 @@ val from_json : Yojson.Basic.t -> t
 (** [to_json c] is the JSON file that calendar [c] represents. *)
 val to_json :  t -> unit
 
+(**[find_event c str] is Some [e] if [e] has the name [str] in [c] 
+   and None otherwise. *)
+val find_event : t -> string -> event option
+
 (**[add_event e c] is calendar [c] with event [e] added. 
     Raises: [CannotAddExisting] if a similar event exists. *)
 val add_event : t -> event -> t
@@ -73,6 +77,6 @@ val change_end_time : Time.t -> event -> event
 
 (** [parse_file fname] is the calendar [c] stored in the json file [fname]
     Requires: [fname] is a valid json file corresponding to a calendar.
-    *)
+*)
 val parse_file : string -> t
 

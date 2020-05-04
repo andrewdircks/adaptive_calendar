@@ -262,11 +262,11 @@ let from_json_string (str:string) =
 let to_military ampm hour = 
   let ap = String.lowercase_ascii ampm in
   if ap = "am" then 
-  if hour = 12 then 0
-  else hour
+    if hour = 12 then 0
+    else hour
   else if ap = "pm" then 
-  if hour != 12 then hour + 12
-  else 12
+    if hour != 12 then hour + 12
+    else 12
   else failwith ("not am or pm")
 
 
@@ -299,8 +299,8 @@ let month_to_int m =
   | Dec -> 12
 
 (** [addzeros count term] is a string 
-  concatenating "0" with [term] 
-  while length of [term] < [count]
+    concatenating "0" with [term] 
+    while length of [term] < [count]
 *)
 let rec addzeros count term = 
   if String.length term < count then addzeros count ("0" ^ term) 

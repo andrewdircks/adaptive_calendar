@@ -19,6 +19,8 @@ exception InvalidField
 
 exception EmptyCalendarName
 
+type view_option = Single of Calendar.event | Week of Time.t
+
 type meta_command = Create | Access
 
 type command = 
@@ -72,10 +74,10 @@ let is_valid_date_string str =
     (* check for integers in data/time spots *)
     else try
         let areints = int_of_string (String.sub str 0 2) +
-        int_of_string (String.sub str 3 2) +
-        int_of_string (String.sub str 6 4) +
-        int_of_string (String.sub str 11 2) +
-        int_of_string (String.sub str 14 2) in
+                      int_of_string (String.sub str 3 2) +
+                      int_of_string (String.sub str 6 4) +
+                      int_of_string (String.sub str 11 2) +
+                      int_of_string (String.sub str 14 2) in
         if areints > 0 then true else false
       with Failure _ -> false
 
@@ -180,3 +182,15 @@ let save_parse c = Calendar.to_json c
 let create_parse name = 
   if name = "" then raise EmptyCalendarName
   else (Calendar.to_json (Calendar.empty name)); name
+
+let view_parse c str = 
+
+  (* Handle view week *)
+  if String.contains str '/' then failwith "havent implemeneted weeks yet"
+
+  (* Handle view event *)
+  else 
+    match Calendar.find_event c str with 
+    | Some e -> Single e
+    | None -> raise Calendar.EventDNE
+
