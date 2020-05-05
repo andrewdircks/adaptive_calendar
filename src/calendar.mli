@@ -43,24 +43,23 @@ val from_json : Yojson.Basic.t -> t
 (** [to_json c] is the JSON file that calendar [c] represents. *)
 val to_json :  t -> unit
 
-(**[find_event c str] is Some [e] if [e] has the name [str] in [c] 
-   and None otherwise. *)
-val find_event : t -> string -> event option
+(**[find_event c str] is Some [e] if [e] is a list of events in [c] with nanme 
+   [str] and None otherwise.  *)
+val find_event : t -> string -> (event list) option
 
 (**[add_event e c] is calendar [c] with event [e] added. 
     Raises: [CannotAddExisting] if a similar event exists. *)
 val add_event : t -> event -> t
 
-(** [delete_event (name,start) c] ic [c] with the event of name [name] and start
-    time [start] deleted.
+(** [delete_event e c] ic [c] with [e] deleted
     Raises: [EventDNE] if there is no such event. *)
-val delete_event : t -> (string * Time.t) -> t
+val delete_event : t -> event -> t
 
-(** [edit_event info c] is [c] but with the event of name and start time as in 
-    [info] edited according to field and new value of [info].
-    Requires: [info] is a tuple (oldname, oldstarttime, field, newvalue)
+(** [edit_event info c] is [c] but with the event in [info] edited according 
+    to field and new value of [info].
+    Requires: [info] is a tuple (event field, newvalue)
     Raises: [EventDNE] if there is no such event.*)
-val edit_event : t -> (string * Time.t * string * string) -> t
+val edit_event : t -> (event * string * string) -> t
 
 (** [change_name n e] is event [e] with name changed to [e]. 
     Requires: [n] is a non-empty string. *)

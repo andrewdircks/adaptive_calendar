@@ -315,7 +315,6 @@ let time_to_string (tm:t):string =
     (string_of_int hr |> addzeros 2) ^  ":" ^
     (string_of_int min |> addzeros 2)
 
-
 let occurs_before t1 t2 =
   (* handle years first *)              
   let years = compare t1.year t2.year in

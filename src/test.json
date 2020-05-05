@@ -1,0 +1,17 @@
+{
+  "events": [
+    {
+      "starts": "01/05/2020/20:30",
+      "ends": "02/04/2020/20:30",
+      "name": "jan test",
+      "description": "asdf"
+    },
+    {
+      "starts": "04/20/2020/21:40",
+      "ends": "04/20/2020/21:45",
+      "name": "test",
+      "description": "a test!"
+    }
+  ],
+  "calname": "test"
+}

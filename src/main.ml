@@ -58,6 +58,15 @@ let print_StartAfterEnd () =
 let print_InvalidField () = 
   ANSITerminal.(print_string [red] "Make sure you are changing the correct field. \n")
 
+(** [print_OutOfBounds ()] displays error for an invalid integer array index. *)
+let print_OutOfBounds () = 
+  ANSITerminal.(print_string [red] "Enter a valid integer from the list of start times. \n")
+
+(** [print_multiple_events ()] prints a message that multiple events with this 
+    name exist. *)
+let print_multiple_events () = 
+  ANSITerminal.(print_string [blue] "Multiple events with this name exist. When does your this start? (enter the number as labeled). \n")
+
 (** [main_instructions ()] is the main recursive function once a calendar is selected.
     It enables the user to run functions that interact with the calendar.*)
 let rec main_instructions () = 
@@ -79,7 +88,7 @@ let event_name_instructions () =
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
-(** [view_instructions ()] prompts user to enter an event name or week to view. *)
+(** [vevent_or_weel_instructions ()] prompts user to enter an event name or week to view. *)
 let event_or_week_instructions () = 
   ANSITerminal.(print_string [red] "Enter an event name or week to view (in format mm/dd) \n");
   Stdlib.print_string "Type here: > ";
@@ -133,6 +142,24 @@ let rec create_instructions () : string =
   with 
   | EmptyCalendarName -> print_try_again (); (create_instructions ())
 
+let rec print_start_times es acc : unit = 
+  match es with 
+  | [] -> ()
+  | h::t -> ANSITerminal.(print_string [red] ((string_of_int acc) ^ ". " ^ (Graphic.to_display_time (h.starts |> Time.toLocal)) ^ "\n"));
+    print_start_times t (acc + 1)
+
+
+(** [multiple_events_instructions es] runs instructions for handling events
+    with the same name. *)
+let rec multiple_events_instructions es display : Calendar.event = 
+  if display then print_multiple_events ();
+  print_start_times es 1; 
+  Stdlib.print_string "Type here: > ";
+  try 
+    Stdlib.read_line () |> int_of_string |> Command.multiple_event_parse es 
+  with 
+  | OutOfBounds -> print_OutOfBounds (); multiple_events_instructions es false
+
 (** [add_instructions ()] runs instructions for adding events*)
 let rec add_instructions () : Calendar.event = 
   let name = event_name_instructions () in 
@@ -148,55 +175,62 @@ let rec add_instructions () : Calendar.event =
   | StartAfterEnd -> print_StartAfterEnd (); add_instructions ()
   | InvalidDateString -> print_InvalidDateString (); add_instructions ()
 
-(** [delete_instructions ()] runs instructions for deleting events*)
-let rec delete_instructions () = 
+let rec handle_multiple_events c name : Calendar.event = 
+  (match Calendar.find_event c name with 
+   | Some es -> (match es with 
+       | h::[] -> h 
+       | h::t -> multiple_events_instructions es true
+       | _ -> print_OutOfBounds (); handle_multiple_events c name)
+   | None -> print_EventDNE (); handle_multiple_events c name)
+
+let rec delete_instructions (c : Calendar.t) : Calendar.t = 
   let name = event_delete_edit_name_instructions "delete" in 
-  let starttime = start_time_instructions () in 
-  try delete_parse [name; starttime] 
-  with 
-  | InvalidDate -> print_InvalidDate (); delete_instructions ()
-  | MalformedList -> print_MalformedList (); delete_instructions ()
-  | EmptyEventName -> print_EmptyEventName (); delete_instructions ()
-  | StartAfterEnd -> print_StartAfterEnd (); delete_instructions ()
-  | InvalidDateString -> print_InvalidDateString (); delete_instructions ()
-  | EventDNE -> print_EventDNE (); delete_instructions ()
+  let event = handle_multiple_events c name
+  in
+  Calendar.delete_event c event
 
 (** [edit_instructions ()] runs instructions for editing events*)
-let rec edit_instructions () = 
+let rec edit_instructions c = 
   let name = event_delete_edit_name_instructions "edit" in 
-  let starttime = start_time_instructions () in 
+  let event = handle_multiple_events c name in
   let field = field_instructions () in 
   let thechange = field_edit_instructions field in 
-  try edit_parse [name; starttime; field; thechange] 
+  try edit_parse (event, field, thechange)
   with 
-  | InvalidDate -> print_InvalidDate (); print_try_again (); edit_instructions ()
-  | MalformedList -> print_MalformedList (); print_try_again (); edit_instructions ()
-  | EmptyEventName -> print_EmptyEventName (); print_try_again (); edit_instructions ()
-  | StartAfterEnd -> print_StartAfterEnd (); print_try_again (); edit_instructions ()
-  | InvalidDateString -> print_InvalidDateString (); print_try_again (); edit_instructions ()
-  | EventDNE -> print_EventDNE (); print_try_again (); edit_instructions ()
+  | InvalidDate -> print_InvalidDate (); print_try_again (); edit_instructions c
+  | MalformedList -> print_MalformedList (); print_try_again (); edit_instructions c
+  | EmptyEventName -> print_EmptyEventName (); print_try_again (); edit_instructions c
+  | StartAfterEnd -> print_StartAfterEnd (); print_try_again (); edit_instructions c
+  | InvalidDateString -> print_InvalidDateString (); print_try_again (); edit_instructions c
+  | EventDNE -> print_EventDNE (); print_try_again (); edit_instructions c
 
 (** [view_instructions c] runs instructions for viewing events of [c]*)
-let rec view_instructions c : unit = 
+let rec view_instructions c inst : unit = 
   let command = event_or_week_instructions () in 
   try 
     match view_parse c command with 
-    | Single e -> Graphic.view_event e
+    | Single es -> 
+      (match es with 
+       | [] -> failwith "find event error"
+       | h::[] -> Graphic.view_event h; change false c
+       | _ -> multiple_events_instructions es true |> Graphic.view_event; change false c )
     | Week _ -> failwith "havent implemented week view"
   with
-  | _ -> print_try_again (); view_instructions c
+  | EventDNE -> print_try_again (); view_instructions c false
+  | InvalidDateString -> print_InvalidDateString (); print_try_again (); view_instructions c false
+  | _ -> print_try_again (); view_instructions c false
 
 (** [change success c] is the primary recursive function for playing this application.*) 
-let rec change (success : bool) (c : Calendar.t) : unit = 
+and change (success : bool) (c : Calendar.t) : unit = 
   if success then print_success ();
   try
     match main_instructions () with  
     | Create -> let n = create_instructions () in change true (Calendar.empty n)
     | Add -> add_instructions () |> Calendar.add_event c |> change true
-    | Delete -> delete_instructions () |> Calendar.delete_event c |> change true
-    | Edit -> edit_instructions () |> Calendar.edit_event c |> change true
+    | Delete -> delete_instructions c |> change true
+    | Edit -> edit_instructions c |> Calendar.edit_event c |> change true
     | Save -> Command.save_parse c; print_success (); exit 0
-    | View -> view_instructions c
+    | View -> view_instructions c true
     | _ -> change false c
   with 
   | CannotAddExisting -> print_CannotAddExisting (); print_try_again (); change false c

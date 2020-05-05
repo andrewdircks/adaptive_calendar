@@ -19,7 +19,9 @@ exception InvalidField
 
 exception EmptyCalendarName
 
-type view_option = Single of Calendar.event | Week of Time.t
+exception OutOfBounds
+
+type view_option = Single of Calendar.event list | Week of Time.t
 
 type meta_command = Create | Access
 
@@ -159,23 +161,25 @@ let ensure_valid_change c f =
   (* descriptions always valid *)
   else c
 
+let first t = match t with (x, _, _) -> x
+let second t = match t with (_, x, _) -> x
+let third t = match t with (_, _, x) -> x
+
 let edit_parse input = 
-  if List.length input <> 4 then raise MalformedList
-  else 
-    try
-      let eventToEdit = delete_parse ([List.nth input 0; List.nth input 1]) in 
-      let fieldToEdit = ensure_valid_field (List.nth input 2) in 
-      let newField = ensure_valid_change (List.nth input 3) fieldToEdit in
+  try
+    let eventToEdit = first input in 
+    let fieldToEdit = ensure_valid_field (second input) in 
+    let newField = ensure_valid_change (third input) fieldToEdit in
 
-      (* return respective tuple, note eventToEdit is already converted to GMT *)
-      (fst eventToEdit, snd eventToEdit, fieldToEdit, newField)
+    (* return respective tuple, note eventToEdit is already converted to GMT *)
+    (eventToEdit, fieldToEdit, newField)
 
-    with 
-    | InvalidDate -> raise InvalidDate
-    | MalformedList -> raise MalformedList 
-    | EmptyEventName -> raise EmptyEventName 
-    | InvalidDateString -> raise InvalidDateString
-    | InvalidField -> raise InvalidField
+  with 
+  | InvalidDate -> raise InvalidDate
+  | MalformedList -> raise MalformedList 
+  | EmptyEventName -> raise EmptyEventName 
+  | InvalidDateString -> raise InvalidDateString
+  | InvalidField -> raise InvalidField
 
 let save_parse c = Calendar.to_json c
 
@@ -191,6 +195,9 @@ let view_parse c str =
   (* Handle view event *)
   else 
     match Calendar.find_event c str with 
-    | Some e -> Single e
+    | Some es -> Single es
     | None -> raise Calendar.EventDNE
 
+let multiple_event_parse es idx = 
+  try List.nth es (idx - 1) 
+  with _ -> raise OutOfBounds

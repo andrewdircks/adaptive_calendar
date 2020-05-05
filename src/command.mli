@@ -29,8 +29,11 @@ exception InvalidField
 (** Raised if an empty calendar name is entered. *)
 exception EmptyCalendarName
 
+(** Raised if an out of bounds index is called for a list. *)
+exception OutOfBounds
+
 (** The type representing meta user commands to start the application. *)
-type view_option = Single of Calendar.event | Week of Time.t
+type view_option = Single of Calendar.event list | Week of Time.t
 
 (** The type representing meta user commands to start the application. *)
 type meta_command = Create | Access
@@ -78,18 +81,17 @@ val add_parse : string list -> Calendar.event
             [InvalidDateString] if the inputted date string is not in correct form.*)
 val delete_parse : string list -> (string * Time.t)
 
-(** [edit_parse str] is a tuple (oldname, oldstarttime, field, change) in which
-    "oldname" represents the name of the event to be edited, "oldstarttime" 
-    represents the start time of the event to be edited, "field" is the field
+(** [edit_parse input] is a tuple (event, field, change) in which
+    "event" is the event to be changed, "field" is the field
     to be changed in the event, and "change" is the new respective value in
     that field.
-    Requires: [str] is a list as such: 
-              [old name; old start date; field to edit; new value].
+    Requires: [tuple] as such: 
+              (event, field, change).
     Raises: [InvalidDate] if an invalid date is entered. 
             [MalformedList] if [str] is not a list of length 4. 
             [EmptyEventName] if no event name is entered. 
             [InvalidDateString] if the inputted date string is not in correct form.*)
-val edit_parse : string list -> (string * Time.t * string * string)
+val edit_parse : (Calendar.event * string * string) -> (Calendar.event * string * string)
 
 (** [save_parse] writes the current calendar as a json file and returns unit. *)
 val save_parse : Calendar.t -> unit
@@ -102,3 +104,6 @@ val create_parse : string -> string
     event. *)
 val view_parse : Calendar.t -> string -> view_option
 
+(** [multiple_event_parse es idx] is the event in [es] that has index [idx - 1]. 
+    Raises: [OutOfBounds] if the start time of the event is not found. *)
+val multiple_event_parse : Calendar.event list -> int -> Calendar.event

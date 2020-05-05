@@ -109,34 +109,22 @@ let rec mem (name : string) (start : Time.t) (events : event list) : bool =
 let has_name (n : string) (e : event) : bool = e.name = n
 
 let find_event c name = 
-  List.find_opt (has_name name) c.events
+  let es = List.filter (has_name name) c.events in
+  match List.filter (has_name name) c.events with 
+  | [] -> None
+  | h::t -> Some es
 
 let add_event c e = 
   if (mem e.name e.starts c.events) then raise CannotAddExisting
   else 
     { calname = c.calname; events = (e :: c.events)}
 
-(** [delete_event_from_list info events not] is a tuple with first element
-    as the event that was delted and second element [events] without the event 
-    identified by the (name, start) in [info]. 
-    Raises: [EventDNE] if there is no such event *)
-let rec delete_event_from_list info events not = 
-  match events with 
-  | [] -> raise EventDNE
-  | h::t -> 
-    if (h.name = fst info && h.starts = snd info) 
-    then (h, not@t)
-    else delete_event_from_list info t (h::not)
 
-let delete_event c info = 
-  try (
-    let leftover = (delete_event_from_list info c.events []) in
-    {
-      calname = c.calname;
-      events = snd leftover;
-    }
-  )
-  with EventDNE -> raise EventDNE
+let delete_event c e = 
+  {
+    calname = c.calname;
+    events = List.filter (fun x -> x <> e) c.events;
+  }
 
 let change_name n e = 
   {
@@ -170,43 +158,26 @@ let change_end_time et e =
     description = e.description;
   }
 
-
-(**[firsttwo_from_tuple x] is the a tuple
-   containing the first two elements in [x]
-   Requires: [x] is tuple of length 4*)
-let firsttwo_from_tuple x = 
-  match x with 
-  | (name, start, _, _) -> (name, start)
-
-(**[third_from_tuple x] is the a tuple
-   containing the third element in [x]
-   Requires: [x] is tuple of length 4*)
-let third_from_tuple x = 
-  match x with 
-  | (_, _, third, _) -> third
-
-(**[fourth_from_tuple x] is the a tuple
-   containing the fourth element in [x]
-   Requires: [x] is tuple of length 4*)
-let fourth_from_tuple x = 
-  match x with 
-  | (_, _, _, fourth) -> fourth
+let first t = match t with (x, _, _) -> x
+let second t = match t with (_, x, _) -> x
+let third t = match t with (_, _, x) -> x
 
 let edit_event c info = 
   try ( 
-    let leftover = (delete_event_from_list (firsttwo_from_tuple info) c.events []) in
-    let field = third_from_tuple info in 
-    let value = fourth_from_tuple info in 
+    let event = first info in
+    let field = second info in 
+    let value = third info in 
     let new_event = 
-      if field = "name" then change_name value (fst leftover) 
-      else if field = "description" then change_description value (fst leftover) 
-      else if field = "start" then change_start_time (value |> Time.from_json_string) (fst leftover)
-      else if field = "end" then change_end_time (value |> Time.from_json_string) (fst leftover)
+      if field = "name" then change_name value event 
+      else if field = "description" then change_description value event 
+      else if field = "start" then change_start_time (value |> Time.from_json_string) event
+      else if field = "end" then change_end_time (value |> Time.from_json_string) event
       else raise EventDNE
     in 
+    let deleted = delete_event c event in
     {
       calname = c.calname;
-      events = new_event :: (snd leftover)
+      events = new_event :: deleted.events
     }
   )
   with 
