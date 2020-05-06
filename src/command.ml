@@ -34,6 +34,7 @@ type command =
   | Previous
   | Next
   | Save
+  | Exit
 
 let meta_parse str = 
   let n = String.length str in
@@ -44,10 +45,54 @@ let meta_parse str =
     else raise MetaCommandDNE
   else raise MetaCommandDNE
 
+(** [today_smart str] handles a user input date string. 
+    If the string is in the form xx, where xx is in an integer between 0 and 31 
+    then [(int_of_string xx, currentmonth, currentyear)] is returned. 
+    If the string is in the form xx/yy, where yy is between 1 and 12, then 
+    [(int_of_string xx, int_of_string yy, current year)] is returned. 
+    If the string is in the form xx/yy/zzzz then all data is returned.
+    Raises: Invalid date string if the date entered is not logical or the 
+        string is not formed. Does not handle impossible combinations, i.e. 
+        "02/31/" can be returned. *)
+let today_smart (str : string) : Time.day_m * Time.month * Time.year = 
+  try 
+    let now = Time.now in
+    let split = String.split_on_char '/' str in 
+    let fields = List.length split in 
+
+    (* handle only day entered *)
+    if fields = 1 then 
+      let day = List.nth split 0 |> int_of_string in 
+      if day < 1 || day > 31 then failwith "esc"
+      else (day, now.month, now.year)
+
+    (* handle day and month entered *)
+    else if fields = 2 then 
+      let day = List.nth split 1 |> int_of_string in 
+      let month = List.nth split 0 |> int_of_string |> Time.month_from_int in 
+      if day < 1 || day > 31 then failwith "esc" 
+      else (day, month, now.year)
+
+    (* handle day, month, and year entered *)
+    else if fields = 3 then 
+      let day = List.nth split 1 |> int_of_string in 
+      let month = List.nth split 0 |> int_of_string |> Time.month_from_int in 
+      let year = List.nth split 2 |> int_of_string in
+      if day < 1 || day > 31 then failwith "esc" 
+      else if year < 2020 then failwith "esc"
+      else (day, month, year)
+
+    (* handle inproper number of fields entered *)
+    else failwith "esc"
+
+  (* catch int of string failures *)
+  with _ -> raise InvalidDateString
+
 
 let main_parse str = 
-  let n = String.length str in
-  let lc_str = String.lowercase_ascii str in
+  let str' = String.trim str in
+  let n = String.length str' in
+  let lc_str = String.lowercase_ascii str' in
   if n = 3 then (if lc_str = "add" then Add else raise CommandDNE) 
   else if n = 6 then (if lc_str = "delete" then Delete else raise CommandDNE)
   else if n = 8 then (if lc_str = "previous" then Previous else raise CommandDNE)
@@ -56,6 +101,7 @@ let main_parse str =
      else if lc_str = "view" then View 
      else if lc_str = "next" then Next
      else if lc_str = "save" then Save
+     else if lc_str = "exit" then Exit
      else raise CommandDNE)
   else raise CommandDNE
 
@@ -86,8 +132,8 @@ let is_valid_date_string str =
 (** [handle_date_input s1 s2] is the tuple (d1,d2) where d1 and d2 are the 
     respective date/time values for date strings s1 and s2.
     Raises: [InvalidDateString] if [s1] or [s2] is not in proper form. 
-            [InvalidDate] if [s1] or [s2] is not a valid date. 
-            [StartAfterEnd] if [s1] is not before [s2]. *)
+        [InvalidDate] if [s1] or [s2] is not a valid date. 
+        [StartAfterEnd] if [s1] is not before [s2]. *)
 let handle_date_input s1 s2 = 
   (* determine if s1 and s2 are valid date strings *)
   if not (is_valid_date_string s1) then raise InvalidDateString
@@ -187,10 +233,25 @@ let create_parse name =
   if name = "" then raise EmptyCalendarName
   else (Calendar.to_json (Calendar.empty name)); name
 
+let first t = match t with (x, _, _) -> x
+let second t = match t with (_, x, _) -> x
+let third t = match t with (_, _, x) -> x
+
 let view_parse c str = 
 
   (* Handle view week *)
-  if String.contains str '/' then failwith "havent implemeneted weeks yet"
+  if String.contains str '/' 
+     || 
+     (match int_of_string_opt str with | Some _ -> true | None -> false) then 
+
+    let week_info = today_smart str in 
+    let t = {
+      year = third week_info;
+      month = second week_info;
+      day_m = first week_info;
+      time_d = {hour=0; minute=1}
+    } in 
+    Week t
 
   (* Handle view event *)
   else 

@@ -48,6 +48,7 @@ type command =
   | Previous
   | Next
   | Save
+  | Exit
 
 (** [main_parse str] parses a player's input into a command. Any capitilizations 
     of valid commands (i.e. words in type [command]) are valid.

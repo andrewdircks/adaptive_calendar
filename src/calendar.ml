@@ -182,3 +182,10 @@ let edit_event c info =
   )
   with 
   | EventDNE -> raise EventDNE 
+
+(** [sort_events es] is [e] with all events sorted in starting time order. *)
+let sort_events (es : event list) : event list = 
+  List.sort (fun e1 e2 -> Time.compare_time e1.starts e2.starts) es
+
+let get_week t c =
+  List.filter (fun e -> same_week t e.starts) c.events

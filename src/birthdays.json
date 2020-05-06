@@ -1,0 +1,35 @@
+{
+  "events": [
+    {
+      "starts": "05/20/2020/20:30",
+      "ends": "05/20/2020/20:35",
+      "name": "does search even work",
+      "description": "tet"
+    },
+    {
+      "starts": "06/12/2020/21:30",
+      "ends": "06/12/2020/21:33",
+      "name": "rob",
+      "description": "dad's 53rd birthday"
+    },
+    {
+      "starts": "02/05/2020/20:40",
+      "ends": "02/05/2020/20:45",
+      "name": "mom",
+      "description": "mom's 51st birthday! (shes old woww.)"
+    },
+    {
+      "starts": "07/05/2020/22:10",
+      "ends": "07/06/2020/00:10",
+      "name": "Andrew",
+      "description": "andrews birthday (not really, i just mixed them up man)"
+    },
+    {
+      "starts": "07/10/2020/21:30",
+      "ends": "07/10/2020/21:45",
+      "name": "sam",
+      "description": "Sam's 18th birthday!"
+    }
+  ],
+  "calname": "birthdays"
+}

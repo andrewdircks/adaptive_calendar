@@ -217,8 +217,7 @@ let toLocal d = increment_hour d difference
 
 let toGMT d = increment_hour d (-difference)
 
-(** [month_from_int m] the [month] analog of [m].
-    Requires: [m] is between 1 and 12.*)
+
 let month_from_int (m : int) : month = 
   if m = 1 then Jan
   else if m = 2 then Feb
@@ -345,5 +344,26 @@ let compare_time t1 t2=
   if t1 = t2 then 0
   else if occurs_before t1 t2 then -1 
   else 1
+
+(** [n_days t1 t2] is true if [t2] occurs [n] or less days after [t1] and false
+    otherwise. 
+    Requires: [compare_time t1 t2] is -1 upon initial call; [n] >= 0 *)
+let rec n_days t1 t2 n = 
+  let cmp = compare_time t1 t2 in
+  if cmp >= 0 then true
+  else if n = 0 then false
+  else n_days t1 (decrement_day t2) (n-1)
+
+let same_week t1 t2 =
+  let cmp = compare_time t1 t2 in
+
+  (* times are the same *)
+  if cmp = 0 then true 
+
+  (* t1 occurs before t2 *)
+  else if cmp < 0 then n_days t1 t2 7
+
+  (* t1 occurs after t2 *)
+  else false
 
 

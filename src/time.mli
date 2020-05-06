@@ -42,6 +42,10 @@ val toLocal : t -> t
     Requires: [d] represents a time in the users time zone. *)
 val toGMT : t -> t
 
+(** [month_from_int m] the [month] analog of [m].
+    Requires: [m] is between 1 and 12.*)
+val month_from_int : int -> month
+
 (** [is_leap_year] is true if the current year is a leap year, and false
     otherwise. *)
 val is_leap_year : bool
@@ -75,3 +79,7 @@ val occurs_before : t -> t -> bool
 
 (** [compare_time t1 t2] implements the standard comparison function for times. *)
 val compare_time : t -> t -> int
+
+(** [same_week t1 t2] is [true] if [t1] and [t2] occur within 7 days 
+    of each other. *)
+val same_week : t -> t -> bool

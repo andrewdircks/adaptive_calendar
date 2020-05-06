@@ -70,11 +70,13 @@ let print_multiple_events () =
 (** [main_instructions ()] is the main recursive function once a calendar is selected.
     It enables the user to run functions that interact with the calendar.*)
 let rec main_instructions () = 
-  ANSITerminal.(print_string [red] "What would you like to do?\n");
+  ANSITerminal.(print_string [Bold] "\nWhat would you like to do?\n");
   ANSITerminal.(print_string [blue] "Add: Make new event\n");
   ANSITerminal.(print_string [blue] "Edit: Modify existing event\n");
   ANSITerminal.(print_string [blue] "Delete: Delete existing event\n");
-  ANSITerminal.(print_string [blue] "Save: Close and Save to file\n");
+  ANSITerminal.(print_string [blue] "View: View events\n");
+  ANSITerminal.(print_string [blue] "Save: Save your changes\n");
+  ANSITerminal.(print_string [blue] "Exit: Exit the application (does not save)\n \n");
 
   Stdlib.print_string "Type here: > ";
   try (Stdlib.read_line ()|> main_parse) 
@@ -90,7 +92,8 @@ let event_name_instructions () =
 
 (** [vevent_or_weel_instructions ()] prompts user to enter an event name or week to view. *)
 let event_or_week_instructions () = 
-  ANSITerminal.(print_string [red] "Enter an event name or week to view (in format mm/dd) \n");
+  ANSITerminal.(print_string [green] "Enter the name on the event you would like to view.\n");
+  ANSITerminal.(print_string [green] "Or, enter the starting date of the week you would like to view.\n");
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
 
@@ -132,6 +135,11 @@ let field_edit_instructions field =
   ANSITerminal.(print_string [red] ("What would you like to change the " ^ field ^ " to?\n"));
   Stdlib.print_string "Type here: > ";
   Stdlib.read_line ()
+
+(** [print_exit_message ()] prints the exit message. *)
+let print_exit_message () = 
+  ANSITerminal.(print_string [green] ("Exiting calendar. See you soon!\n"))
+
 
 (** [create_instructions ()] runs instructions for creating calendar*)
 let rec create_instructions () : string =
@@ -214,7 +222,7 @@ let rec view_instructions c inst : unit =
        | [] -> failwith "find event error"
        | h::[] -> Graphic.view_event h; change false c
        | _ -> multiple_events_instructions es true |> Graphic.view_event; change false c )
-    | Week _ -> failwith "havent implemented week view"
+    | Week t -> Graphic.view_week c t; change false c 
   with
   | EventDNE -> print_try_again (); view_instructions c false
   | InvalidDateString -> print_InvalidDateString (); print_try_again (); view_instructions c false
@@ -229,8 +237,9 @@ and change (success : bool) (c : Calendar.t) : unit =
     | Add -> add_instructions () |> Calendar.add_event c |> change true
     | Delete -> delete_instructions c |> change true
     | Edit -> edit_instructions c |> Calendar.edit_event c |> change true
-    | Save -> Command.save_parse c; print_success (); exit 0
+    | Save -> Command.save_parse c; print_success (); change false c
     | View -> view_instructions c true
+    | Exit -> print_exit_message (); exit 1
     | _ -> change false c
   with 
   | CannotAddExisting -> print_CannotAddExisting (); print_try_again (); change false c
@@ -243,12 +252,15 @@ let start_cal file =
   change false c
 
 (** [read_file ()] gets calendar name from user ands load calendars into program*)
-let read_file () = 
+let rec read_file () = 
   print_endline "Enter the calendar you would like to edit:\n";
   Stdlib.print_string  "> ";
-  match read_line () with
-  | exception End_of_file -> ()
-  | cal_name -> start_cal (cal_name ^ ".json")
+  try
+    match read_line () with
+    | exception End_of_file -> ()
+    | cal_name -> start_cal (cal_name ^ ".json")
+  with 
+    _ -> print_endline "\nThat calendar does not exist. Make sure you enter an existing calendar name!\n"; read_file ()
 
 (** [meta_instructions ()] lists the highest level instructions *)
 let rec meta_instructions () = 

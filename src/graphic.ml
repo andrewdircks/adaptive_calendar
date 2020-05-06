@@ -1,5 +1,9 @@
 open Calendar
 
+let col = ref 0
+
+let incr c = c := (!c + 1); c
+
 (** [month_string m] is the month that [f] represents. 
     Requires: [f] is a string in "01"..."12"*)
 let month_string m = 
@@ -17,6 +21,11 @@ let month_string m =
   | "11" -> "November"
   | "12" -> "December"
   | _ -> raise Command.InvalidDate
+
+let int_to_background i = 
+  if !i mod 3 = 0 then ANSITerminal.on_yellow 
+  else if !i mod 3 = 1 then ANSITerminal.on_cyan
+  else ANSITerminal.on_green
 
 (** [day_ofm_string d] is the day of the month that [d] represents. 
     Requires: [d] is a string in "01"..."31"*)
@@ -50,22 +59,31 @@ let view_event e =
   let start = (Time.toLocal e.starts |> to_display_time) in 
   let ends = (Time.toLocal e.ends |> to_display_time) in 
   let desc = e.description in 
+  let background = int_to_background (incr col) in
 
   (* erase everything above the event *)
-  ANSITerminal.erase Above;
+  (* ANSITerminal.erase Above; *)
 
   (* print event name *)
-  ANSITerminal.(print_string [black; Bold; Underlined; on_yellow] ("\n" ^ "\n" ^ name ^ "\n" ^ "\n"));
+  ANSITerminal.(print_string [black; Bold; Underlined; background] ("\n" ^ "\n" ^ name ^ "\n" ^ "\n"));
 
   (* print event start/end times *)
-  ANSITerminal.(print_string [black; Bold; on_yellow] (start ^ "\n" ));
-  ANSITerminal.(print_string [black; Bold; on_yellow] ("\n" ^" to" ^ "\n" ^ "\n"));
-  ANSITerminal.(print_string [black; Bold; on_yellow] (ends ^ "\n" ^ "\n" ));
+  ANSITerminal.(print_string [black; Bold; background] (start ^ "\n" ));
+  ANSITerminal.(print_string [black; Bold; background] ("\n" ^" to" ^ "\n" ^ "\n"));
+  ANSITerminal.(print_string [black; Bold; background] (ends ^ "\n" ^ "\n" ));
 
   (* print description *)
-  ANSITerminal.(print_string [black; on_yellow] (desc ^ "\n"));
+  ANSITerminal.(print_string [black; background] (desc ^ "\n"));
 
   print_string "\n \n \n"
 
+let print_no_events () = 
+  ANSITerminal.(print_string [black; Bold] ("\nNo events are scheduled for this week.\n \n"))
 
-let view_week c s = ()
+let rec view_multiple_events es empty_start =
+  match es with
+  | [] -> if empty_start then print_no_events () else ()
+  | h::t -> view_event h; view_multiple_events t false
+
+let view_week c s = 
+  view_multiple_events (Calendar.get_week s c) true

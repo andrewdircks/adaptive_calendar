@@ -75,7 +75,11 @@ val change_start_time : Time.t -> event -> event
 val change_end_time : Time.t -> event -> event
 
 (** [parse_file fname] is the calendar [c] stored in the json file [fname]
-    Requires: [fname] is a valid json file corresponding to a calendar.
-*)
+    Requires: [fname] is a valid json file corresponding to a calendar.*)
 val parse_file : string -> t
+
+(** [get_week t c] is the list of events in [c] that occur on the day of [t] and 
+    six days after. *)
+val get_week : Time.t -> t -> event list
+
 
