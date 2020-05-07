@@ -179,8 +179,7 @@ let decrement_day (d : t) : t =
   if is_valid d' then d' else decrement_month d'
 
 
-(** [increment_hour d dt] is [d] with its hour incremented by [dt] hours. 
-    Requires: [dt] is a positive integer less than 24. *)
+
 let increment_hour (d : t) (dt : int) : t = 
   let h' = d.time_d.hour + dt in 
   (* handle going into the next day *)
@@ -199,7 +198,7 @@ let increment_hour (d : t) (dt : int) : t =
                     month = d.month;
                     day_m = d.day_m;
                     time_d = {
-                      hour = d.time_d.hour + 23;
+                      hour = h' + 24;
                       minute = d.time_d.minute;
                     } } 
 

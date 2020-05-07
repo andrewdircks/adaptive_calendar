@@ -22,6 +22,20 @@ let calendar_tests =
     (**calname_test "test_calendar.json name" "test" cal_test;*)
   ]
 
+
+(** [test_increment_hour name initialtime dif expectout] 
+    constructs an OUnit test named [name] asserting the equality of 
+     *)
+let test_increment_hour 
+    (name : string) (start_time : string) (dif:int) (expected_out_time : string) : test = 
+  name >:: (fun _ ->
+      assert_equal expected_out_time 
+        (let s = Time.from_json_string start_time in 
+        (Time.increment_hour s dif |> Time.time_to_string) 
+        ))
+
+ 
+
 (** [test_time_user_conversion name user_time expected_out_time] 
     constructs an OUnit test named [name] asserting the equality of 
     time_to_string [from_input_string user_time] with [expected_out_time] *)
@@ -77,6 +91,16 @@ let time_tests =
     test_time_json_conversion "07/29/3012/07:00" "07/29/3012/07:00";
     test_time_json_conversion "04/24/2020/00:30" "04/24/2020/00:30";
     test_time_json_conversion "07/29/3012/19:00" "07/29/3012/19:00";
+
+
+    test_increment_hour "testing day bef " "04/30/2020/01:00" (-10) "04/29/2020/15:00";
+    test_increment_hour "testing day bef boundary" "04/30/2020/00:00" (-10) "04/29/2020/14:00";
+    test_increment_hour "testing same day backwards " "02/27/2020/13:00" (-9) "02/27/2020/04:00";
+    test_increment_hour "testing same day forwards " "09/01/2020/13:00" (4) "09/01/2020/17:00";
+    test_increment_hour "testing next day forwards " "09/01/2020/23:00" (5) "09/02/2020/04:00";
+    test_increment_hour "boundary forwards " "09/01/2020/00:00" (4) "09/01/2020/04:00";
+
+
 
     same_week_test "same time"
       { year = 2021;
