@@ -32,6 +32,9 @@ exception EmptyCalendarName
 (** Raised if an out of bounds index is called for a list. *)
 exception OutOfBounds
 
+(** Raised if an invalid duration is entered. *)
+exception InvalidDuration
+
 (** The type representing meta user commands to start the application. *)
 type view_option = Single of Calendar.event list | Week of Time.t
 
@@ -50,6 +53,7 @@ type command =
   | Save
   | Exit
 
+
 (** [main_parse str] parses a player's input into a command. Any capitilizations 
     of valid commands (i.e. words in type [command]) are valid.
     Raises: [CommandDNE] if an invalid command is entered. *)
@@ -60,17 +64,22 @@ val main_parse : string -> command
     Raises: [MetaCommandDNE] if an invalid command is entered. *)
 val meta_parse : string -> string
 
-
 (** [add_parse str] parses a player's input into an event to be added to the 
     current calendar. 
-    Requires: [str] is a list representing the title, starting date in 
-    correct form, ending date in correct form, and description in that order.
     Raises: [InvalidDate] if an invalid date is entered. 
             [EmptyEventName] is no event name is entered. 
             [InvalidDateString] if the inputted date strings are not in correct form.
             [StartAfterEnd] if the start date is after the end date. 
             [MalformedList] if [str] is not a list of length four. *)
-val add_parse : string list -> Calendar.event
+val add_parse : (string * Time.t * Time.t * string) -> Calendar.event
+
+(** [handle_date_input t1 t2] is t2 if t2 occurs after t2. Otherwise,
+    raises [StartAfterEnd].*)
+val handle_date_input : Time.t -> Time.t -> Time.t 
+
+(** [duration_parse t dur] ensures [dur] is a hour/minute input and 
+    is [t] plus [dur] hours.*)
+val duration_parse : Time.t -> string -> Time.t 
 
 (** [delete_parse str] parses a player's input into an event title and start date
     tuple representing the event to be deleted from the current calendar.

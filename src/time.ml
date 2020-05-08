@@ -23,6 +23,8 @@ type t = {
   time_d : time_d;
 }
 
+exception InvalidInput
+
 let is_leap_year = 
   let y = (Unix.time() |> Unix.localtime).tm_year + 1900 in 
   y mod 4 = 0 && (if y mod 100 = 0 then y mod 400 = 0 else true)
@@ -216,6 +218,26 @@ let toLocal d = increment_hour d difference
 
 let toGMT d = increment_hour d (-difference)
 
+let increment_minute d dt : t = 
+  let m' = d.time_d.minute + dt in 
+
+  (* handle going into the next hour *)
+  if m' >= 60 then 
+    increment_hour { year = d.year;
+                     month = d.month;
+                     day_m = d.day_m;
+                     time_d = {
+                       hour = d.time_d.hour;
+                       minute = m' - 60;
+                     } } 1
+  else 
+    { year = d.year;
+      month = d.month;
+      day_m = d.day_m;
+      time_d = {
+        hour = d.time_d.hour;
+        minute = m';
+      } } 
 
 let month_from_int (m : int) : month = 
   if m = 1 then Jan
@@ -269,16 +291,22 @@ let to_military ampm hour =
 
 
 let from_input_string (str:string) = 
-  if String.length str <> 19 then failwith ("invalid string length: " ^ str) else 
+  let split = String.split_on_char '/' str in 
+  let time_d = String.split_on_char ':' (List.nth split 3) in
+  try 
+    let month = int_of_string (List.nth split 0) |> month_from_int in 
+    let day = int_of_string (List.nth split 1) in 
+    let year = int_of_string (List.nth split 2) in 
+    let ampm = List.nth split 4 in 
+    let hour = int_of_string (List.nth time_d 0) |> to_military ampm in 
+    let min = int_of_string (List.nth time_d 1) in 
     {
-      year = String.sub str 6 4 |> int_of_string;
-      month = String.sub str 0 2 |> int_of_string |> month_from_int;
-      day_m = String.sub str 3 2 |> int_of_string;
-      time_d = {
-        hour = String.sub str 11 2 |> int_of_string |> to_military (String.sub str 17 2);
-        minute = String.sub str 14 2 |> int_of_string ;
-      }
+      year = year; 
+      month = month; 
+      day_m = day; 
+      time_d = {hour = hour; minute = min}
     }
+  with _ -> raise InvalidInput
 
 (** [month_to_int m] is the integer representation of [m]. *)
 let month_to_int m = 
@@ -364,5 +392,14 @@ let same_week t1 t2 =
 
   (* t1 occurs after t2 *)
   else false
+
+(** [increment_multiple_hours t hrs] is [t] with [hrs] hours added on.*)
+let rec increment_multiple_hours (t : t) (hrs : int) : t = 
+  if hrs = 0 then t 
+  else increment_multiple_hours (increment_hour t 1) (hrs-1)
+
+let increment_duration (t : t) (dur : time_d) = 
+  let t' = increment_minute t dur.minute in 
+  increment_multiple_hours t' dur.hour
 
 

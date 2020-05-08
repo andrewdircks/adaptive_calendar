@@ -21,6 +21,8 @@ exception EmptyCalendarName
 
 exception OutOfBounds
 
+exception InvalidDuration
+
 type view_option = Single of Calendar.event list | Week of Time.t
 
 type meta_command = Create | Access
@@ -35,6 +37,14 @@ type command =
   | Next
   | Save
   | Exit
+
+let first_3 t = match t with (x, _, _) -> x
+let second_3 t = match t with (_, x, _) -> x
+let third_3 t = match t with (_, _, x) -> x
+let first_4 t = match t with (x, _, _, _) -> x
+let second_4 t = match t with (_, x, _, _) -> x
+let third_4 t = match t with (_, _, x, _) -> x
+let fourth_4 t = match t with (_, _, _, x) -> x
 
 let meta_parse str = 
   let n = String.length str in
@@ -108,65 +118,41 @@ let main_parse str =
 (** [is_valid_date_string str] is true if [str] is in the form 
     ii/ii/iiii/ii:ii/cc. where each 'i' is an integer and each 'c' is a char. *)
 let is_valid_date_string str = 
-  if String.length str <> 19 then false 
-  (* check for correct slash position *)
-  else if (str.[2] <> '/' || str.[5] <> '/' || str.[10] <> '/' || str.[16] <> '/')
-  then false 
-  (* check for correct colon position *)
-  else if (str.[13] <> ':') then false
-  (* check for am/pm at the end *)
-  else
-    let ampm = (String.sub str 17 2) in
-    if (String.lowercase_ascii  ampm <> "am" && String.lowercase_ascii ampm <> "pm")
-    then false
-    (* check for integers in data/time spots *)
-    else try
-        let areints = int_of_string (String.sub str 0 2) +
-                      int_of_string (String.sub str 3 2) +
-                      int_of_string (String.sub str 6 4) +
-                      int_of_string (String.sub str 11 2) +
-                      int_of_string (String.sub str 14 2) in
-        if areints > 0 then true else false
-      with Failure _ -> false
+  try 
+    Time.from_input_string str |> Time.is_valid
+  with _ -> false
 
-(** [handle_date_input s1 s2] is the tuple (d1,d2) where d1 and d2 are the 
-    respective date/time values for date strings s1 and s2.
-    Raises: [InvalidDateString] if [s1] or [s2] is not in proper form. 
-        [InvalidDate] if [s1] or [s2] is not a valid date. 
-        [StartAfterEnd] if [s1] is not before [s2]. *)
-let handle_date_input s1 s2 = 
-  (* determine if s1 and s2 are valid date strings *)
-  if not (is_valid_date_string s1) then raise InvalidDateString
-  else if not (is_valid_date_string s2) then raise InvalidDateString 
-  else 
-    let asdf = Time.from_input_string s1 in 
-    let d2 = Time.from_input_string s2 in
-    (* determine if d1 and d2 are valid dates *)
-    if not (Time.is_valid asdf) || not (Time.is_valid d2) then raise InvalidDate 
-    (* determine if d1 occurs before d2 *)
-    else if not (Time.occurs_before asdf d2) then raise StartAfterEnd 
-    else (asdf,d2)
+let handle_date_input t1 t2 = 
+  if not (Time.is_valid t2) then raise InvalidDate 
+  else if not (Time.occurs_before t1 t2) then raise StartAfterEnd 
+  else t2
+
+let validate_duration (str : string) : Time.time_d = 
+  (* handle just hours inputted *)
+  if not (String.contains str ':') 
+  then {hour = int_of_string str; minute = 0}
+
+  (* handle hours and minutes inputted *)
+  else let split = String.split_on_char ':' str in 
+    if not (List.length split = 2) then raise InvalidDuration 
+    else try
+        let hour = int_of_string (List.nth split 0) in 
+        let min = int_of_string (List.nth split 1) in 
+        if not (hour >= 0) then raise InvalidDuration 
+        else if not (min >= 0 && min <60) then raise InvalidDuration
+        else {hour = hour; minute = min}
+      with _ -> raise InvalidDuration
+
+let duration_parse t dur = 
+  Time.increment_duration t (validate_duration dur)
 
 let add_parse input : Calendar.event = 
-  if List.length input <> 4 then raise MalformedList
-  else 
-    (* handle event name input *)
-    let name = List.nth input 0 in 
-    if String.length name = 0 then raise EmptyEventName
-    (* handle start and end time input *)
-    else 
-      let start = List.nth input 1 in 
-      let en = List.nth input 2 in 
-      let timeframe = handle_date_input start en in 
-      (* handle description input *)
-      let description = List.nth input 3 in 
-
-      {
-        starts = (fst timeframe) |> Time.toGMT;
-        ends = (snd timeframe) |> Time.toGMT;
-        name = name;
-        description = description;
-      }
+  {
+    starts = second_4 input |> Time.toGMT;
+    ends = third_4 input |> Time.toGMT;
+    name = first_4 input;
+    description = fourth_4 input;
+  }
 
 let delete_parse input = 
   if List.length input <> 2 then raise MalformedList
@@ -207,15 +193,12 @@ let ensure_valid_change c f =
   (* descriptions always valid *)
   else c
 
-let first t = match t with (x, _, _) -> x
-let second t = match t with (_, x, _) -> x
-let third t = match t with (_, _, x) -> x
 
 let edit_parse input = 
   try
-    let eventToEdit = first input in 
-    let fieldToEdit = ensure_valid_field (second input) in 
-    let newField = ensure_valid_change (third input) fieldToEdit in
+    let eventToEdit = first_3 input in 
+    let fieldToEdit = ensure_valid_field (second_3 input) in 
+    let newField = ensure_valid_change (third_3 input) fieldToEdit in
 
     (* return respective tuple, note eventToEdit is already converted to GMT *)
     (eventToEdit, fieldToEdit, newField)
@@ -233,10 +216,6 @@ let create_parse name =
   if name = "" then raise EmptyCalendarName
   else (Calendar.to_json (Calendar.empty name)); name
 
-let first t = match t with (x, _, _) -> x
-let second t = match t with (_, x, _) -> x
-let third t = match t with (_, _, x) -> x
-
 let view_parse c str = 
 
   (* Handle view week *)
@@ -246,9 +225,9 @@ let view_parse c str =
 
     let week_info = today_smart str in 
     let t = {
-      year = third week_info;
-      month = second week_info;
-      day_m = first week_info;
+      year = third_3 week_info;
+      month = second_3 week_info;
+      day_m = first_3 week_info;
       time_d = {hour=0; minute=1}
     } in 
     Week t

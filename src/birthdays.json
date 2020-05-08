@@ -1,6 +1,24 @@
 {
   "events": [
     {
+      "starts": "01/02/2020/21:30",
+      "ends": "01/03/2020/01:30",
+      "name": "asdf",
+      "description": "a test"
+    },
+    {
+      "starts": "04/20/2020/20:30",
+      "ends": "04/20/2020/20:31",
+      "name": "asdf",
+      "description": "a test! ! ! ! ! "
+    },
+    {
+      "starts": "07/10/2020/21:30",
+      "ends": "07/10/2020/21:45",
+      "name": "sam",
+      "description": "same birthday yo"
+    },
+    {
       "starts": "05/20/2020/20:30",
       "ends": "05/20/2020/20:35",
       "name": "does search even work",
@@ -23,12 +41,6 @@
       "ends": "07/06/2020/00:10",
       "name": "Andrew",
       "description": "andrews birthday (not really, i just mixed them up man)"
-    },
-    {
-      "starts": "07/10/2020/21:30",
-      "ends": "07/10/2020/21:45",
-      "name": "sam",
-      "description": "Sam's 18th birthday!"
     }
   ],
   "calname": "birthdays"

@@ -25,16 +25,20 @@ let calendar_tests =
 
 (** [test_increment_hour name initialtime dif expectout] 
     constructs an OUnit test named [name] asserting the equality of 
-     *)
-let test_increment_hour 
+*)
+(* let test_increment_hour 
     (name : string) (start_time : string) (dif:int) (expected_out_time : string) : test = 
-  name >:: (fun _ ->
+   name >:: (fun _ ->
       assert_equal expected_out_time 
         (let s = Time.from_json_string start_time in 
-        (Time.increment_hour s dif |> Time.time_to_string) 
-        ))
+         (Time.increment_hour s dif |> Time.time_to_string) 
+        )) *)
 
- 
+let test_increment_duration
+    (name : string) (start_time : Time.t) (dur : Time.time_d) (expected : Time.t) : test = 
+  name >:: (fun _ ->
+      assert_equal expected (Time.increment_duration start_time dur)
+    )
 
 (** [test_time_user_conversion name user_time expected_out_time] 
     constructs an OUnit test named [name] asserting the equality of 
@@ -93,14 +97,89 @@ let time_tests =
     test_time_json_conversion "07/29/3012/19:00" "07/29/3012/19:00";
 
 
-    test_increment_hour "testing day bef " "04/30/2020/01:00" (-10) "04/29/2020/15:00";
-    test_increment_hour "testing day bef boundary" "04/30/2020/00:00" (-10) "04/29/2020/14:00";
-    test_increment_hour "testing same day backwards " "02/27/2020/13:00" (-9) "02/27/2020/04:00";
-    test_increment_hour "testing same day forwards " "09/01/2020/13:00" (4) "09/01/2020/17:00";
-    test_increment_hour "testing next day forwards " "09/01/2020/23:00" (5) "09/02/2020/04:00";
-    test_increment_hour "boundary forwards " "09/01/2020/00:00" (4) "09/01/2020/04:00";
+    (* test_increment_hour "testing day bef " "04/30/2020/01:00" (-10) "04/29/2020/15:00";
+       test_increment_hour "testing day bef boundary" "04/30/2020/00:00" (-10) "04/29/2020/14:00";
+       test_increment_hour "testing same day backwards " "02/27/2020/13:00" (-9) "02/27/2020/04:00";
+       test_increment_hour "testing same day forwards " "09/01/2020/13:00" (4) "09/01/2020/17:00";
+       test_increment_hour "testing next day forwards " "09/01/2020/23:00" (5) "09/02/2020/04:00";
+       test_increment_hour "boundary forwards " "09/01/2020/00:00" (4) "09/01/2020/04:00"; *)
 
+    test_increment_duration "basic minutes"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=0; minute=0}}
+      {hour=0; minute=15}
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=0; minute=15}};
 
+    test_increment_duration "minutes accross hours"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=1; minute=45}}
+      {hour=0; minute=15}
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=2; minute=0}};
+
+    test_increment_duration "minutes accross days"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=23; minute=45}}
+      {hour=0; minute=15}
+      { year = 2021;
+        month = Sep;
+        day_m = 15;
+        time_d = {hour=0; minute=0}};
+
+    test_increment_duration "basic hours"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=12; minute=45}}
+      {hour=1; minute=0}
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=13; minute=45}};
+
+    test_increment_duration "basic hour and minute"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=12; minute=45}}
+      {hour=1; minute=15}
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=14; minute=0}};
+
+    test_increment_duration "24 hours"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=12; minute=45}}
+      {hour=24; minute=0}
+      { year = 2021;
+        month = Sep;
+        day_m = 15;
+        time_d = {hour=12; minute=45}};
+
+    test_increment_duration "48 hours"
+      { year = 2021;
+        month = Sep;
+        day_m = 14;
+        time_d = {hour=12; minute=45}}
+      {hour=48; minute=0}
+      { year = 2021;
+        month = Sep;
+        day_m = 16;
+        time_d = {hour=12; minute=45}};
 
     same_week_test "same time"
       { year = 2021;

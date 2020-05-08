@@ -25,6 +25,9 @@ type t = {
   time_d : time_d;
 }
 
+(** Raised if an invalid input is entered to represent a date. *) 
+exception InvalidInput
+
 (** [is_valid d] is true if [d] is a valid date and time. *)
 val is_valid : t -> bool
 
@@ -83,3 +86,7 @@ val compare_time : t -> t -> int
 (** [same_week t1 t2] is [true] if [t1] and [t2] occur within 7 days 
     of each other. *)
 val same_week : t -> t -> bool
+
+(** [increment_duration t dur] is [t] with its duration changed by the hours
+    and minutes in [dur]. *)
+val increment_duration : t -> time_d -> t
