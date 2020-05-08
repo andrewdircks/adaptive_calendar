@@ -1,0 +1,41 @@
+{
+  "events": [
+    {
+      "starts": "04/27/2020/10:00",
+      "ends": "04/27/2020/10:30",
+      "name": "Get coffee",
+      "description": "Getting coffee for people"
+    },
+    {
+      "starts": "04/27/2020/11:00",
+      "ends": "04/27/2020/11:45",
+      "name": "Buy groceries",
+      "description": "fruit salad"
+    },
+    {
+      "starts": "04/27/2020/14:00",
+      "ends": "04/27/2020/18:00",
+      "name": "Zoom University",
+      "description": "Study time"
+    },
+    {
+      "starts": "04/28/2020/10:00",
+      "ends": "04/28/2020/10:30",
+      "name": "Get coffee",
+      "description": "Getting coffee for people"
+    },
+    {
+      "starts": "04/28/2020/11:00",
+      "ends": "04/28/2020/11:45",
+      "name": "Buy groceries",
+      "description": "nutri grain cereal!"
+    },
+    {
+      "starts": "04/27/2020/14:00",
+      "ends": "04/27/2020/18:00",
+      "name": "Zoom University",
+      "description": "Study time :("
+    }
+  ],
+  "calname": "test"
+}
