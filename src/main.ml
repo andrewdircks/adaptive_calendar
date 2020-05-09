@@ -8,13 +8,18 @@ exception Back
 (* Raised if the user wants to print in depth instructions. *)
 exception Help
 
+(** [validate_name n] ensures that user inputted name [n] is not empty.  *)
 let validate_name n = if String.trim n = "" then raise EmptyEventName else n
 
+(** [help_back str] checks that user input [str] is not the 'help' or 'back
+    commands. If [str] is one of these commands, the respective errors are raised,
+    otherwise, [str] is returned. *)
 let help_back str = 
   if str = "back" then raise Back 
   else if str = "help" then raise Help 
   else str
 
+(** [print_commands ()] prints the description of valid user commands. *)
 let print_commands () : unit = 
   ANSITerminal.(print_string [blue] "Add: Make new event\n");
   ANSITerminal.(print_string [blue] "Edit: Modify existing event\n");
@@ -29,8 +34,8 @@ let print_commands () : unit =
 (** [print_helps ()] prints the help instructions. *)
 let print_help () : unit = 
   ANSITerminal.(print_string [green; Bold;] "\n\n\n");
-  ANSITerminal.(print_string [green; Bold; on_black] "Help:\n\n");
-  ANSITerminal.(print_string [black] "This calendar application is written in OCaml by Andrew Dircks and Samuel Kantor.\n\n");
+  ANSITerminal.(print_string [green; Bold; on_black] "Help:");
+  ANSITerminal.(print_string [black] "\n\nThis calendar application is written in OCaml by Andrew Dircks and Samuel Kantor.\n\n");
   ANSITerminal.(print_string [cyan; Bold] "Intended Use:\n");
   ANSITerminal.(print_string [black] "This calendar is designed for software development teams using Git.\nWith this source code in a git repository, team members can create and edit calendars,\nwhich can be accessed, viewed, and altered anywhere, automatically adaptive to time zone. \n\n");
   ANSITerminal.(print_string [blue; Bold] "Overview:\n");
@@ -45,20 +50,43 @@ let print_help () : unit =
 
   ANSITerminal.(print_string [cyan; Bold] "\nEdit:\n");
   ANSITerminal.(print_string [black] "The edit command is responsible for editing existing events in the calendar.\n");
-  ANSITerminal.(print_string [black] "Once called, the user is prompted to enter the name of the event they would like to edit. (cap sensitive)\n");
+  ANSITerminal.(print_string [black] "Once called, the user is prompted to enter the name of the event they would like to edit. (case sensitive)\n");
   ANSITerminal.(print_string [black] "If this event does not exist, the user will be reprompted.\n");
   ANSITerminal.(print_string [black] "If multiple events are found with the same name, the application will display the start times of each,\n");
   ANSITerminal.(print_string [black] "and the user will be required to choose the entry to be edited.\n");
   ANSITerminal.(print_string [black] "The user must then enter 'name' 'start' 'end' or 'description' and update the respective field. \n");
 
   ANSITerminal.(print_string [cyan; Bold] "\nDelete:\n");
+  ANSITerminal.(print_string [black] "The delete command is responsible for removing events in the calendar.\n");
+  ANSITerminal.(print_string [black] "Once called, the user is prompted to enter the name of the event they would like to delete. (case sensitive)\n");
+  ANSITerminal.(print_string [black] "If multiple events are found with the same name, the application will display the start times of each.\n");
+  ANSITerminal.(print_string [black] "and the user will be required to choose the entry to be deleted.\n");
+
   ANSITerminal.(print_string [cyan; Bold] "\nView:\n");
+  ANSITerminal.(print_string [black] "The view command is responsible for viewing your calendar!\n");
+  ANSITerminal.(print_string [black] "Once called, the user has the choice for two viewing options: a single event, or a week.\n");
+  ANSITerminal.(print_string [black] "If you would like to view a single event, simply enter the name of that event (case sensitive).\n");
+  ANSITerminal.(print_string [black] "Similar to 'edit' and 'delete', the application handles the case of the event not existing and/or multiple events existing with that name.\n");
+  ANSITerminal.(print_string [black] "If you would like to view a week, enter the START date of that week in the following formats: \n");
+  ANSITerminal.(print_string [black; Bold] " 'dd' or 'mm/dd/' or 'mm/dd/yyyy'. \n");
+  ANSITerminal.(print_string [black] "If only the day is entered (e.g. '5') then the week starting on the user's current year, month, with the entered day is shown. \n");
+  ANSITerminal.(print_string [black] "If both the month and day are entered (e.g. '3/12') then the week starting on the user's current year, with the entered day and month is shown. \n");
+  ANSITerminal.(print_string [black] "If all three fields are entered (e.g. '1/2/2020') then the week starting on that day is entered. \n");
+
   ANSITerminal.(print_string [cyan; Bold] "\nSave:\n");
+  ANSITerminal.(print_string [black] "The save command saves the changes you have made to the current calendar.\n");
+  ANSITerminal.(print_string [black] "Make sure you call this command before exiting, if you'd like to keep your changes!.\n");
+
   ANSITerminal.(print_string [cyan; Bold] "\nExit:\n");
-  ANSITerminal.(print_string [cyan; Bold] "\nBack:\n")
+  ANSITerminal.(print_string [black] "The exit command exits the application (does not save your progress).\n");
 
+  ANSITerminal.(print_string [cyan; Bold] "\nBack:\n");
+  ANSITerminal.(print_string [black] "The back command can be called at any time during application use.\n");
+  ANSITerminal.(print_string [black] "Upon call, the user is brought back to the main instructions page.\n");
+  ANSITerminal.(print_string [black] "Immedieate progress will be lost. For example, if a user calls 'back' while adding an event,.\n");
+  ANSITerminal.(print_string [black] "the progress in that add command will be lost.\n\n\n")
 
-(** [read] allows users to input data and checks for help or back keywords. *)
+(** [read] allows users to input data and checks for 'help' or 'back' keywords. *)
 let read () = 
   try
     Stdlib.read_line () |> help_back
@@ -90,6 +118,15 @@ let print_CommandDNE () =
 (** [print_EventDNE ()] displays event does not exist error message. *)
 let print_EventDNE () = 
   ANSITerminal.(print_string [red] "That event doesnt exist. Make sure you have the correct event name and start time.\n")
+
+(** [print_invalidWeek ()] displays event invalid week error message. *)
+let print_invalidWeek () = 
+  ANSITerminal.(print_string [red] "Make sure the week you are trying to view is in the following forms: \n");
+  ANSITerminal.(print_string [black; Bold] " 'dd' or 'mm/dd/' or 'mm/dd/yyyy'. \n");
+  ANSITerminal.(print_string [black] "For 'dd', the week that starts at the entered day, the user's month, and the user's year is viewed. \n");
+  ANSITerminal.(print_string [black] "For 'mm/dd' the week that starts at the entered month (mm) and day (dd) with the user's year is viewed. \n");
+  ANSITerminal.(print_string [black] "For 'mm/dd/yyyy' then the week starting on that day is entered. \n")
+
 
 (** [print_InvalidDateString ()] displays invalid date message. *)
 let print_InvalidDateString () : unit = 
@@ -131,7 +168,7 @@ let print_OutOfBounds () =
 let print_multiple_events () = 
   ANSITerminal.(print_string [blue] "Multiple events with this name exist. When does this event start? (enter the number as labeled). \n")
 
-(** [main_instructions ()] is the main recursive function once a calendar is selected.
+(** [main_instructions disp] is the main recursive function once a calendar is selected.
     It enables the user to run functions that interact with the calendar.*)
 let rec main_instructions disp = 
   ANSITerminal.(print_string [Bold] "\nWhat would you like to do?\n");
@@ -143,7 +180,7 @@ let rec main_instructions disp =
   | Back -> main_instructions false
   | Help -> main_instructions false
 
-(** [event_name_instructions ()] prompts user for name of event. *)
+(** [event_name_instructions disp] prompts user for name of event. *)
 let rec event_name_instructions disp = 
   if disp then ANSITerminal.(print_string [red] "What is the name of this event?\n");
   Stdlib.print_string "Type here: > ";
@@ -167,7 +204,7 @@ let rec event_delete_edit_name_instructions action =
   Stdlib.print_string "Type here: > ";
   try read () with Help -> event_delete_edit_name_instructions action
 
-(** [start_time_instructions ()] prompts user for start time value. *)
+(** [start_time_instructions disp] prompts user for start time value. *)
 let rec start_time_instructions disp : Time.t = 
   if disp then ANSITerminal.(print_string [red] "When does this event start?\n");
   Stdlib.print_string "Type here: > ";
@@ -181,7 +218,8 @@ let rec start_time_instructions disp : Time.t =
   | _ -> 
     print_InvalidDateString (); print_try_again (); start_time_instructions false
 
-(** [end_time_instructions ()] prompts user for end time value. *)
+(** [end_time_instructions start disp] prompts user for end time value and 
+    checks for valid time input. *)
 let rec end_time_instructions start disp = 
   if disp then ANSITerminal.(print_string [red] "How long does this event last? (either enter a number of hours or hours:minutes)\n");
   Stdlib.print_string "Type here: > ";
@@ -234,7 +272,7 @@ let rec print_start_times es acc : unit =
   | h::t -> ANSITerminal.(print_string [red] ((string_of_int acc) ^ ". " ^ (Graphic.to_display_time (h.starts |> Time.toLocal)) ^ "\n"));
     print_start_times t (acc + 1)
 
-(** [multiple_events_instructions es] runs instructions for handling events
+(** [multiple_events_instructions es display] runs instructions for handling events
     with the same name. *)
 let rec multiple_events_instructions es display : Calendar.event = 
   if display then print_multiple_events ();
@@ -255,6 +293,10 @@ let rec add_instructions () : Calendar.event =
   let description = description_instructions () in
   (add_parse (name, starttime, endtime, description))
 
+(** [handle_multiple_events c name origin] is the event that the user 
+    wants to perform an action on in [c], as specified by event name [name]. 
+    If multiple events with [name] exist in [c], then the user is prompted
+    to choose which start time they are reffering to. *)
 let rec handle_multiple_events c name origin : Calendar.event = 
   (match Calendar.find_event c name with 
    | Some es -> (match es with 
@@ -263,6 +305,7 @@ let rec handle_multiple_events c name origin : Calendar.event =
        | _ -> print_OutOfBounds (); handle_multiple_events c name origin)
    | None -> print_EventDNE (); handle_multiple_events c (event_delete_edit_name_instructions "delete") origin)
 
+(** [add_instructions c] runs instructions for deleting an event. *)
 and delete_instructions (c : Calendar.t) : Calendar.t = 
   try
     let name = event_delete_edit_name_instructions "delete" in 
@@ -299,7 +342,8 @@ and view_instructions c inst : unit =
        | _ -> multiple_events_instructions es true |> Graphic.view_single; change false c )
     | Week t -> Graphic.view_week c t; change false c 
   with
-  | EventDNE -> print_try_again (); view_instructions c false
+  | EventDNE -> print_EventDNE (); print_try_again (); view_instructions c false
+  | InvalidWeek -> print_invalidWeek (); print_try_again (); view_instructions c false
   | InvalidDateString -> print_InvalidDateString (); print_try_again (); view_instructions c false
   | _ -> print_try_again (); view_instructions c false
 
@@ -315,7 +359,6 @@ and change (success : bool) (c : Calendar.t) : unit =
     | Save -> Command.save_parse c; print_success (); change false c
     | View -> view_instructions c true
     | Exit -> print_exit_message (); exit 1
-    | _ -> change false c
   with 
   | CannotAddExisting -> print_CannotAddExisting (); print_try_again (); change false c
   | EventDNE -> print_EventDNE (); print_try_again (); change false c
@@ -352,13 +395,11 @@ let rec meta_instructions () =
   | MetaCommandDNE -> print_MetaCommandDNE ();
     meta_instructions ()
 
-(** [main ()] starts the calendar interface *)
-
+(** [main ()] starts the calendar application interface *)
 let main () =
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to the Adaptive Calender system!\n");
   meta_instructions ()
 
 (* Execute the calendar engine. *)
-
 let () = main ()

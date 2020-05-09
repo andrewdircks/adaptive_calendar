@@ -23,6 +23,8 @@ exception OutOfBounds
 
 exception InvalidDuration
 
+exception InvalidWeek
+
 type view_option = Single of Calendar.event list | Week of Time.t
 
 type meta_command = Create | Access
@@ -33,17 +35,28 @@ type command =
   | Delete 
   | Edit 
   | View
-  | Previous
-  | Next
   | Save
   | Exit
 
+(** [first_3 t] is the first element in tuple of size 3 [t]. *)
 let first_3 t = match t with (x, _, _) -> x
+
+(** [second_3 t] is the second element in tuple of size 3 [t]. *)
 let second_3 t = match t with (_, x, _) -> x
+
+(** [third_3 t] is the third element in tuple of size 3 [t]. *)
 let third_3 t = match t with (_, _, x) -> x
+
+(** [first_4 t] is the first element in tuple of size 4 [t]. *)
 let first_4 t = match t with (x, _, _, _) -> x
+
+(** [second_4 t] is the second element in tuple of size 4 [t]. *)
 let second_4 t = match t with (_, x, _, _) -> x
+
+(** [third_4 t] is the third element in tuple of size 4 [t]. *)
 let third_4 t = match t with (_, _, x, _) -> x
+
+(** [fourth_4 t] is the fourth element in tuple of size 4 [t]. *)
 let fourth_4 t = match t with (_, _, _, x) -> x
 
 let meta_parse str = 
@@ -61,7 +74,7 @@ let meta_parse str =
     If the string is in the form xx/yy, where yy is between 1 and 12, then 
     [(int_of_string xx, int_of_string yy, current year)] is returned. 
     If the string is in the form xx/yy/zzzz then all data is returned.
-    Raises: Invalid date string if the date entered is not logical or the 
+    Raises: [InvalidWeek] if the date entered is not logical or the 
         string is not formed. Does not handle impossible combinations, i.e. 
         "02/31/" can be returned. *)
 let today_smart (str : string) : Time.day_m * Time.month * Time.year = 
@@ -96,7 +109,7 @@ let today_smart (str : string) : Time.day_m * Time.month * Time.year =
     else failwith "esc"
 
   (* catch int of string failures *)
-  with _ -> raise InvalidDateString
+  with _ -> raise InvalidWeek
 
 
 let main_parse str = 
@@ -105,18 +118,15 @@ let main_parse str =
   let lc_str = String.lowercase_ascii str' in
   if n = 3 then (if lc_str = "add" then Add else raise CommandDNE) 
   else if n = 6 then (if lc_str = "delete" then Delete else raise CommandDNE)
-  else if n = 8 then (if lc_str = "previous" then Previous else raise CommandDNE)
   else if n = 4 then 
     (if lc_str = "edit" then Edit
      else if lc_str = "view" then View 
-     else if lc_str = "next" then Next
      else if lc_str = "save" then Save
      else if lc_str = "exit" then Exit
      else raise CommandDNE)
   else raise CommandDNE
 
-(** [is_valid_date_string str] is true if [str] is in the form 
-    ii/ii/iiii/ii:ii/cc. where each 'i' is an integer and each 'c' is a char. *)
+(** [is_valid_date_string str] is true if [str] is a valid start or end time string. *)
 let is_valid_date_string str = 
   try 
     Time.from_input_string str |> Time.is_valid
@@ -127,6 +137,12 @@ let handle_date_input t1 t2 =
   else if not (Time.occurs_before t1 t2) then raise StartAfterEnd 
   else t2
 
+(** [validate_duration str] is {hour=h; minute=m;} corresponding to the user's
+    input duration [str]. If [str] has no ':', then it is assumed that the
+    inputted duration is referring to hours, with minutes 0. If [str] 
+    contains ':' then h:m is the input string. 
+    Raises: [InvalidDuration] if the user's input cannot be interpreted 
+    a number *)
 let validate_duration (str : string) : Time.time_d = 
   (* handle just hours inputted *)
   if not (String.contains str ':') 

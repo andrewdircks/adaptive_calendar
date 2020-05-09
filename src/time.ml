@@ -180,8 +180,7 @@ let decrement_day (d : t) : t =
   (* ensure day of month is valid *)
   if is_valid d' then d' else decrement_month d'
 
-
-
+(** [increment_hour d dt] is [d] with its hour incremented by [dt] hours. *)
 let increment_hour (d : t) (dt : int) : t = 
   let h' = d.time_d.hour + dt in 
   (* handle going into the next day *)
@@ -213,11 +212,11 @@ let increment_hour (d : t) (dt : int) : t =
            minute = d.time_d.minute;
          } } 
 
-
 let toLocal d = increment_hour d difference
 
 let toGMT d = increment_hour d (-difference)
 
+(** [increment_minute d dt] is [d] with its minute incremented by [dt] minutes. *)
 let increment_minute d dt : t = 
   let m' = d.time_d.minute + dt in 
 
@@ -239,6 +238,7 @@ let increment_minute d dt : t =
         minute = m';
       } } 
 
+(** [month_from_int m] is the month represented by [m]. *)
 let month_from_int (m : int) : month = 
   if m = 1 then Jan
   else if m = 2 then Feb
@@ -253,6 +253,22 @@ let month_from_int (m : int) : month =
   else if m = 11 then Nov 
   else Dec
 
+(** [month_to_int m] is the integer representation of [m]. *)
+let month_to_int m = 
+  match m with 
+  | Jan -> 1
+  | Feb -> 2
+  | Mar -> 3
+  | Apr -> 4
+  | May -> 5
+  | Jun -> 6
+  | Jul -> 7
+  | Aug -> 8
+  | Sep -> 9
+  | Oct -> 10
+  | Nov -> 11
+  | Dec -> 12
+
 
 let now =
   let tm = Unix.localtime (Unix.time()) in 
@@ -263,7 +279,6 @@ let now =
       hour = tm.tm_hour;
       minute = tm.tm_min;
     } } 
-
 
 let from_json_string (str:string) = 
   if String.length str <> 16 then failwith ("invalid string length: " ^ str) else 
@@ -308,26 +323,8 @@ let from_input_string (str:string) =
     }
   with _ -> raise InvalidInput
 
-(** [month_to_int m] is the integer representation of [m]. *)
-let month_to_int m = 
-  match m with 
-  | Jan -> 1
-  | Feb -> 2
-  | Mar -> 3
-  | Apr -> 4
-  | May -> 5
-  | Jun -> 6
-  | Jul -> 7
-  | Aug -> 8
-  | Sep -> 9
-  | Oct -> 10
-  | Nov -> 11
-  | Dec -> 12
-
-(** [addzeros count term] is a string 
-    concatenating "0" with [term] 
-    while length of [term] < [count]
-*)
+(** [addzeros count term] is a string concatenating "0" with [term] 
+    while length of [term] < [count]. *)
 let rec addzeros count term = 
   if String.length term < count then addzeros count ("0" ^ term) 
   else term
@@ -402,11 +399,10 @@ let increment_duration (t : t) (dur : time_d) =
   let t' = increment_minute t dur.minute in 
   increment_multiple_hours t' dur.hour
 
-
 let day_of_week (t : t) : string = 
   let tmstruct = {tm_sec = 0; tm_min = t.time_d.minute; 
-  tm_hour = t.time_d.hour; tm_mday = t.day_m;  tm_mon = (month_to_int t.month)-1;
-  tm_year = t.year - 1900; tm_wday = -1; tm_isdst = false; tm_yday = -1} in 
+                  tm_hour = t.time_d.hour; tm_mday = t.day_m;  tm_mon = (month_to_int t.month)-1;
+                  tm_year = t.year - 1900; tm_wday = -1; tm_isdst = false; tm_yday = -1} in 
   let v = snd (Unix.mktime tmstruct) in
   let w = v.tm_wday in
   if w = 0 then "Sunday"

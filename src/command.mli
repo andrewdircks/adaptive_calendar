@@ -35,6 +35,9 @@ exception OutOfBounds
 (** Raised if an invalid duration is entered. *)
 exception InvalidDuration
 
+(** Raised if an invalid view week is entered. *)
+exception InvalidWeek
+
 (** The type representing meta user commands to start the application. *)
 type view_option = Single of Calendar.event list | Week of Time.t
 
@@ -48,11 +51,8 @@ type command =
   | Delete 
   | Edit 
   | View
-  | Previous
-  | Next
   | Save
   | Exit
-
 
 (** [main_parse str] parses a player's input into a command. Any capitilizations 
     of valid commands (i.e. words in type [command]) are valid.

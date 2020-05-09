@@ -91,5 +91,5 @@ val same_week : t -> t -> bool
     and minutes in [dur]. *)
 val increment_duration : t -> time_d -> t
 
-
+(** [day_of_week t] is the day of the week that [t] occurs on. *)
 val day_of_week : t -> string
