@@ -25,7 +25,7 @@ exception InvalidDuration
 
 exception InvalidWeek
 
-type view_option = Single of Calendar.event list | Week of Time.t
+type view_option = Single of Calendar.event list | Week of Time.t | All
 
 type meta_command = Create | Access
 
@@ -60,8 +60,9 @@ let third_4 t = match t with (_, _, x, _) -> x
 let fourth_4 t = match t with (_, _, _, x) -> x
 
 let meta_parse str = 
-  let n = String.length str in
-  let lc_str = String.lowercase_ascii str in
+  let str' = String.trim str in
+  let n = String.length str' in
+  let lc_str = String.lowercase_ascii str' in
   if n = 6 then 
     if lc_str = "create" then "create"
     else if lc_str = "access" then "access"
@@ -144,21 +145,22 @@ let handle_date_input t1 t2 =
     Raises: [InvalidDuration] if the user's input cannot be interpreted 
     a number *)
 let validate_duration (str : string) : Time.time_d = 
-  (* handle just hours inputted *)
-  if not (String.contains str ':') 
-  then {hour = int_of_string str; minute = 0}
+  try 
+    (* handle just hours inputted *)
+    if not (String.contains str ':') 
+    then {hour = int_of_string str; minute = 0}
 
-  (* handle hours and minutes inputted *)
-  else let split = String.split_on_char ':' str in 
-    if not (List.length split = 2) then raise InvalidDuration 
-    else try
-        let hour = int_of_string (List.nth split 0) in 
-        let min = int_of_string (List.nth split 1) in 
-        if not (hour >= 0) then raise InvalidDuration 
-        else if not (min >= 0 && min <60) then raise InvalidDuration
-        else {hour = hour; minute = min}
-      with _ -> raise InvalidDuration
-
+    (* handle hours and minutes inputted *)
+    else let split = String.split_on_char ':' str in 
+      if not (List.length split = 2) then raise InvalidDuration 
+      else try
+          let hour = int_of_string (List.nth split 0) in 
+          let min = int_of_string (List.nth split 1) in 
+          if not (hour >= 0) then raise InvalidDuration 
+          else if not (min >= 0 && min <60) then raise InvalidDuration
+          else {hour = hour; minute = min}
+        with _ -> raise InvalidDuration
+  with _ -> raise InvalidDuration
 let duration_parse t dur = 
   Time.increment_duration t (validate_duration dur)
 
@@ -185,11 +187,8 @@ let delete_parse input =
         if not (Time.is_valid d) then raise InvalidDate 
         else (name, d |> Time.toGMT)
 
-(** [ensure_valid_field f] is [f] in all lowercase if [f] is the string 
-    "name" "description" "start" or "end".
-    Raises: [InvalidField] if [f] is not either of these strings. *)
 let ensure_valid_field f = 
-  let lc = String.lowercase_ascii f in
+  let lc = String.lowercase_ascii (String.trim f) in
   if (lc <> "description" && lc <> "name" && lc <> "start" && lc <> "end")
   then raise InvalidField else lc
 
@@ -198,16 +197,17 @@ let ensure_valid_field f =
     Requires: [f] is a valid field in all lowercase. 
     Raises: [InvalidEdit]  *)
 let ensure_valid_change c f = 
+  let c' = String.trim c in
   (* handle name editing *)
   if f = "name" then 
-    (if c = "" then raise EmptyEventName else c) 
+    (if c' = "" then raise EmptyEventName else c) 
 
   (* handle start or end time editing *)
   else if f = "start" || f = "end" then 
-    (if not (is_valid_date_string c) then raise InvalidDateString else c)
+    (if not (is_valid_date_string c') then raise InvalidDateString else c')
 
   (* descriptions always valid *)
-  else c
+  else c'
 
 
 let edit_parse input = 
@@ -234,10 +234,13 @@ let create_parse name =
 
 let view_parse c str = 
 
+  (* Handle view all *)
+  if String.lowercase_ascii (String.trim str) = "all" then All
+
   (* Handle view week *)
-  if String.contains str '/' 
-     || 
-     (match int_of_string_opt str with | Some _ -> true | None -> false) then 
+  else if String.contains str '/' 
+          || 
+          (match int_of_string_opt str with | Some _ -> true | None -> false) then 
 
     let week_info = today_smart str in 
     let t = {

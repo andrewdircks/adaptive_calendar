@@ -42,10 +42,8 @@ let day_ofm_string d =
     Requires: [d] is a string in the format "hh:mm"*)
 let time_ofd_string d = 
   let hr = int_of_string (String.sub d 0 2) in 
-
   (* pm case *)
   if hr > 12 then (string_of_int (hr - 12)) ^ ":" ^ (String.sub d 3 2) ^ " PM"
-
   (* am case *)
   else (string_of_int hr) ^ ":" ^ (String.sub d 3 2) ^ " AM"
 
@@ -73,7 +71,8 @@ let head_display_time t =
 
 let view_event e = 
   let name = e.name in 
-  let timestr ="\t"^  disp_hour (Time.toLocal e.starts) ^ " to " ^ disp_hour(Time.toLocal e.ends) ^ ":" in
+  let timestr ="\t"^  disp_hour (Time.toLocal e.starts) 
+               ^ " to " ^ disp_hour(Time.toLocal e.ends) ^ ":" in
   let background = int_to_background (incr col) in
 
   (* print event start/end times *)
@@ -81,12 +80,12 @@ let view_event e =
   (* print event name *)
   ANSITerminal.(print_string [black; Bold; background] ("\n\n\t" ^ name ^ "\n" ));
   (* print description *)
-  ANSITerminal.(print_string [black; Reset; background] ("\t" ^ e.description ^ "\n" ));
+  ANSITerminal.(print_string [black; Reset; background] ("\t" ^ e.description ^"\n"));
   print_newline ()
 
 (** [print_no_events ()] displays to the user that no events occur in that week. *)
 let print_no_events () = 
-  ANSITerminal.(print_string [black; Bold] ("\nNo events are scheduled for this week.\n \n"))
+  ANSITerminal.(print_string [black; Bold] ("\nNo events are scheduled.\n \n"))
 
 (** [deliver_header evt] displays to the header corresponding to the event's day.*)
 let deliver_header evt = 
@@ -107,7 +106,6 @@ let rec view_multiple_events es empty_start prevday =
     let loctime = Time.toLocal h.starts in
     (if loctime.day_m <> prevday then (deliver_header h)
      else ());
-
     view_event h; view_multiple_events t false (loctime.day_m)
 
 let view_week c s = 
@@ -115,3 +113,6 @@ let view_week c s =
 
 let view_single evt = 
   view_multiple_events [evt] true (-1)
+
+let view_all c = 
+  view_multiple_events (sort_events (c.events)) true (-1)

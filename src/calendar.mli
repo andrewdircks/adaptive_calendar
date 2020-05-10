@@ -61,19 +61,6 @@ val delete_event : t -> event -> t
     Raises: [EventDNE] if there is no such event.*)
 val edit_event : t -> (event * string * string) -> t
 
-(** [change_name n e] is event [e] with name changed to [e]. 
-    Requires: [n] is a non-empty string. *)
-val change_name : string -> event -> event
-
-(** [change_description d e] is event [e] with description changed to [d]. *)
-val change_description : string -> event -> event
-
-(** [change_start_time st e] is [e] with start time changed to [st]. *)
-val change_start_time : Time.t -> event -> event
-
-(** [change_end_time et e] is event [e] with end time changed to [et]. *)
-val change_end_time : Time.t -> event -> event
-
 (** [parse_file fname] is the calendar [c] stored in the json file [fname]
     Requires: [fname] is a valid json file corresponding to a calendar.*)
 val parse_file : string -> t
@@ -82,6 +69,7 @@ val parse_file : string -> t
     six days after. *)
 val get_week : Time.t -> t -> event list
 
+(** [sort_events es] is [e] with all events sorted in starting time order. *)
 val sort_events: event list -> event list
 
 

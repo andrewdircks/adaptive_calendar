@@ -1,3 +1,4 @@
 Build/Install Instructions:
-1) Navigate to src by typing "cd src" in command line
+
+1) Navigate to src directory with "cd src"
 2) Run "make cal" to open the main application

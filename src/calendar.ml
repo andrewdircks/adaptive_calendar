@@ -126,6 +126,8 @@ let delete_event c e =
     events = List.filter (fun x -> x <> e) c.events;
   }
 
+(** [change_name n e] is event [e] with name changed to [e]. 
+    Requires: [n] is a non-empty string. *)
 let change_name n e = 
   {
     starts = e.starts;
@@ -134,6 +136,7 @@ let change_name n e =
     description = e.description;
   }
 
+(** [change_description d e] is event [e] with description changed to [d]. *)
 let change_description d e = 
   {
     starts = e.starts;
@@ -142,6 +145,7 @@ let change_description d e =
     description = d;
   }
 
+(** [change_start_time st e] is [e] with start time changed to [st]. *)
 let change_start_time st e = 
   {
     starts = st |> Time.toGMT;
@@ -150,6 +154,7 @@ let change_start_time st e =
     description = e.description;
   }
 
+(** [change_end_time et e] is event [e] with end time changed to [et]. *)
 let change_end_time et e = 
   {
     starts = e.starts;
@@ -158,8 +163,13 @@ let change_end_time et e =
     description = e.description;
   }
 
+(** [first t] is the first element in tuple of size 3 [t]. *)
 let first t = match t with (x, _, _) -> x
+
+(** [second t] is the second element in tuple of size 3 [t]. *)
 let second t = match t with (_, x, _) -> x
+
+(** [third t] is the third element in tuple of size 3 [t]. *)
 let third t = match t with (_, _, x) -> x
 
 let edit_event c info = 
@@ -183,7 +193,6 @@ let edit_event c info =
   with 
   | EventDNE -> raise EventDNE 
 
-(** [sort_events es] is [e] with all events sorted in starting time order. *)
 let sort_events (es : event list) : event list = 
   List.sort (fun e1 e2 -> Time.compare_time e1.starts e2.starts) es
 

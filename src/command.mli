@@ -38,8 +38,8 @@ exception InvalidDuration
 (** Raised if an invalid view week is entered. *)
 exception InvalidWeek
 
-(** The type representing meta user commands to start the application. *)
-type view_option = Single of Calendar.event list | Week of Time.t
+(** The type representing the various view commands a user can call. *)
+type view_option = Single of Calendar.event list | Week of Time.t | All
 
 (** The type representing meta user commands to start the application. *)
 type meta_command = Create | Access
@@ -90,6 +90,11 @@ val duration_parse : Time.t -> string -> Time.t
             [EmptyEventName] if no event name is entered. 
             [InvalidDateString] if the inputted date string is not in correct form.*)
 val delete_parse : string list -> (string * Time.t)
+
+(** [ensure_valid_field f] is [f] in all lowercase if [f] is the string 
+    "name" "description" "start" or "end".
+    Raises: [InvalidField] if [f] is not either of these strings. *)
+val ensure_valid_field : string -> string
 
 (** [edit_parse input] is a tuple (event, field, change) in which
     "event" is the event to be changed, "field" is the field

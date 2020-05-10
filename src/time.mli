@@ -1,5 +1,5 @@
 (** 
-   Time functions and local time zone information of user.
+   Time data structure and local time zone information of user.
 *)
 
 (** Type representing years. Valid range: 2020... *)
