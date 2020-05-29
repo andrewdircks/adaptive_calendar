@@ -20,11 +20,11 @@ For software teams using Git, this calendar system can be shared within a projec
 ## Built With
 
 ## Source Languages
-- [OCaml] (https://ocaml.org)
-- [JSON] (https://www.json.org/json-en.html)
+- [OCaml](https://ocaml.org)
+- [JSON](https://www.json.org/json-en.html)
 
 ### APIs
-- [ANSITerminal] (http://ansiterminal.forge.ocamlcore.org/ANSITerminal.html/ANSITerminal.html) 
-- [Yojson] (https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.Basic.html)
+- [ANSITerminal](http://ansiterminal.forge.ocamlcore.org/ANSITerminal.html/ANSITerminal.html) 
+- [Yojson](https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.Basic.html)
 
 
